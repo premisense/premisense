@@ -1,0 +1,40 @@
+<div>
+    <form name="sensorHistoryForm" class="form-horizontal" role="form">
+        <div class="modal-header" watch-size="sensorHistoryHeader">
+
+            <h3 class="modal-title text-center" id="myModalLabel">Sensor History
+                <a class="text-left" style="float: left;" ng-click="$dismiss()">Back</a>
+            </h3>
+        </div>
+        <div class="modal-body sensor-history-dialog-body"
+             ng-style="{'height': watchSize.window.fullHeight - watchSize.sensorHistoryHeader.fullHeight}"
+                >
+            <div ng-switch="sensorHistory.length > 0">
+                <div ng-switch-when="true">
+                    <table class="table">
+                        <thead watch-size="sensorHistoryThead">
+                        <tr>
+                            <th>Time</th>
+                            <th>Count</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="event in sensorHistory">
+                            <td>{{event.time * 1000 | date:'MMM-dd HH:mm'}}</td>
+                            <td>{{event.count}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div ng-switch-default>
+                    <p>
+                        {{loading ? 'Loading...' : 'No items'}}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!--<div class="modal-footer">-->
+        <!--</div>-->
+    </form>
+</div>
+

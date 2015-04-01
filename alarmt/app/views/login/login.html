@@ -1,0 +1,52 @@
+<div>
+    <form name="loginForm" class="form-horizontal" role="form" ng-submit="login()">
+        <div class="modal-header">
+            <!--<button type="button" class="close" data-dismiss="modal">-->
+            <!--<span aria-hidden="true">&times;</span>-->
+            <!--<span class="sr-only">Close</span>-->
+            <!--</button>-->
+            <h3 class="modal-title" id="myModalLabel">Login</h3>
+        </div>
+        <div class="modal-body">
+
+            <fieldset ng-disabled="!!loginPromise">
+                <div class="form-group has-feedback" ng-class="{'has-error': !loginForm.userName.$valid}">
+                    <div class="col-xs-offset-0 col-xs-11">
+                        <input name="userName" type="text" autofocus class="form-control" id="userName"
+                               ng-model="userName"
+                               placeholder="Username..." required>
+                        <span class="glyphicon glyphicon-remove form-control-feedback" ng-click="userName=''"></span>
+                    </div>
+                </div>
+
+                <div class="form-group has-feedback" ng-class="{'has-error': !loginForm.password.$valid}">
+                    <div class="col-xs-offset-0 col-xs-11">
+                        <input name="password" type="password" class="form-control" id="password" ng-model="password"
+                               placeholder="Password..." required>
+                        <span class="glyphicon glyphicon-remove form-control-feedback" ng-click="password=''"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-xs-offset-0 col-sm-3">
+                        <div class="checkbox">
+                            <label><input type="checkbox" ng-model="rememberMe">Remember Me</label>
+                        </div>
+                    </div>
+                </div>
+
+
+            </fieldset>
+            <div class="alert alert-danger col-xs-11" ng-show="errorMessage.length > 0" role="alert">{{errorMessage}}
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <fieldset ng-disabled="!!loginPromise">
+                <button type="submit" class="btn btn-default" ng-disabled="!loginForm.$valid">Login</button>
+                <!--<button type="button" class="btn btn-default" ng-click="$dismiss()">Close</button>-->
+            </fieldset>
+        </div>
+    </form>
+</div>
+

@@ -1,0 +1,60 @@
+<div>
+    <form name="editAccountForm" xclass="form" role="form" ng-submit="addUpdateAccount()" novalidate>
+        <div class="modal-header">
+
+            <h3 class="modal-title text-center" id="myModalLabel">{{(account == null) ? 'Add' : 'Edit'}} Account
+                <a class="text-left" style="float: left;" ng-class="{'disabled': !editAccountForm.$valid}" ng-click="addUpdateAccount()">Done</a>
+                <a class="text-right" style="float: right;" ng-class="{'disabled': force}"  ng-click="$dismiss()">Cancel</a>
+            </h3>
+        </div>
+        <div class="modal-body">
+
+            <fieldset>
+                <div class="form-group has-feedback" ng-class="{'has-error': !editAccountForm.accountName.$valid}">
+                    <label class="control-label" for="accountName">Account Name</label>
+                    <input name="accountName" type="text" autofocus class="form-control" id="accountName"
+                           ng-model="accountName"
+                           placeholder="Account Name..." required unique-account-validator>
+                    <span ng-show="editAccountForm.accountName.$error.uniqueAccountValidator">Account name already exists !!!</span>
+                </div>
+
+                <div class="form-group has-feedback" ng-class="{'has-error': !editAccountForm.serverAddress.$valid}">
+                    <label class="control-label" for="serverAddress">Server Address</label>
+                    <input name="serverAddress" type="url" autofocus class="form-control" id="serverAddress"
+                           ng-model="serverAddress"
+                           placeholder="Server Address..." required server-address-validator />
+                    </label>
+                    <span ng-show="editAccountForm.serverAddress.$pending.serverAddressValidator">Connecting to server ...</span>
+                    <span ng-show="editAccountForm.serverAddress.$error.serverAddressValidator">Connect failed !!!</span>
+                </div>
+
+                <div class="form-group has-feedback" ng-class="{'has-error': !editAccountForm.userName.$valid}">
+                    <label class="control-label" for="userName">User Name</label>
+                    <input name="userName" type="text" autofocus class="form-control" id="userName"
+                           ng-model="userName"
+                           placeholder="Username..." required login-validator>
+                    <span ng-show="editAccountForm.userName.$pending.loginValidator">Checking login ...</span>
+                    <span ng-show="editAccountForm.userName.$error.loginValidator">Login failed !!!</span>
+                </div>
+
+                <div class="form-group has-feedback" ng-class="{'has-error': !editAccountForm.password.$valid}">
+                    <label class="control-label" for="password">password</label>
+                    <input name="password" type="password" class="form-control" id="password"
+                           ng-model="password"
+                           placeholder="Password..." required login-validator>
+                    <span ng-show="editAccountForm.password.$pending.loginValidator">Checking login ...</span>
+                    <span ng-show="editAccountForm.password.$error.loginValidator">Login failed !!!</span>
+                </div>
+
+
+            </fieldset>
+
+            <div class="alert alert-danger col-xs-11" ng-show="errorMessage.length > 0" role="alert">{{errorMessage}}
+            </div>
+
+        </div>
+        <div class="modal-footer">
+        </div>
+    </form>
+</div>
+

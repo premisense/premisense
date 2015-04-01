@@ -1,0 +1,55 @@
+<div>
+    <form name="accountsForm" class="form-horizontal" role="form">
+        <div class="modal-header">
+
+            <h3 class="modal-title text-center" id="myModalLabel">Accounts
+                <a class="text-left" style="float: left;" ng-click="$dismiss()">Done</a>
+                <span class="text-right" style="float: right;">
+
+                    <span ng-hide="editingAccounts">
+                        <a ng-click="toggleEdit()">Edit</a> <a ng-click="addAccount()">Add</a>
+                    </span>
+                    <span ng-show="editingAccounts">
+                        <a ng-click="toggleEdit()">Cancel</a>
+                    </span>
+                </span>
+            </h3>
+        </div>
+        <div class="modal-body accounts-dialog-body">
+            <div ng-switch="1 > 0">
+                <div ng-switch-when="true">
+                    <ul class="list-group">
+
+                        <li class="list-group-item" ng-repeat="(key, item) in accounts.items">
+                            <a ng-click="editAccount(key)">
+
+                                <h4 class="list-group-item-heading">
+                                    <span ng-show="editingAccounts" ng-switch="markedAccounts[key]">
+                                        <span ng-switch-when="true" class="glyphicon glyphicon-check"></span>
+                                        <span ng-switch-default="" class="glyphicon glyphicon-unchecked"></span>
+                                    </span>
+                                    <!--<span class="glyphicon glyphicon-camera"></span>-->
+                                    {{item.name}}
+                                </h4>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div ng-switch-default>
+                    <p>
+                        No accounts
+                    </p>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <span class="text-left" style="float: left;">
+                <span ng-show="editingAccounts">
+                    <a ng-click="deleteMarked()" ng-class="{'disabled': markedCount() == 0}">Delete</a>
+                </span>
+            </span>
+        </div>
+    </form>
+</div>
+

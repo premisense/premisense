@@ -1,0 +1,33 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12 col-sm-5 col-md-5 col-lg-offset-1">
+            <div class="arm-button-container"
+                 ng-style="{'max-height': buttonHeight}"
+                 style="margin-top: 5px; margin-bottom: 5px;"
+                 ng-repeat="armedStateIter in armedStates|orderBy:'order' track by armedStateIter.id">
+                <button type="button" ng-class="{'active': armedStateIter.id == armedState.id}"
+                        class="btn btn-default btn-block btn-lg arm-button"
+                        ng-click="arm(armedStateIter.id)"
+                        ng-style="{'max-height': (buttonHeight-10) + 'px'}">
+
+                    <span class="badge" ng-show="triggeredItemsCount(armedStateIter.id) > 0">{{triggeredItemsCount(armedStateIter.id)}}</span>
+                    <h2 class="text-left arm-button-content">
+                        <div class="arm-button-small-container">
+                            <img src="" ng-src="{{armedStateIter.metadata.icon}}"
+                                 ng-style="{'max-height': (buttonHeight-20) + 'px'}"
+                                 ng-show="armedStateIter.metadata.icon.length > 0"/>
+                        </div>
+                        <strong>{{armedStateIter.name}}</strong>
+                    </h2>
+                </button>
+            </div>
+        </div>
+
+        <div class="hidden-xs col-sm-offset-1 col-sm-6 col-md-offset-0 col-md-7 col-lg-5 arm-button-big-container ">
+            <!--<div class="arm-button-container">-->
+            <img src="" ng-src="{{armedState.metadata.icon}}"
+                 ng-show="armedState.metadata.icon.length > 0"/>
+            <!--</div>-->
+        </div>
+    </div>
+</div>

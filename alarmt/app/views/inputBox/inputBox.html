@@ -1,0 +1,18 @@
+<div>
+    <form name="inputBoxForm" class="form" role="form" ng-submit="addUpdateAccount()">
+        <div class="modal-header" ng-attr-class="cfg.headerClass">
+            <h3 class="modal-title text-center">{{cfg.title}}</h3>
+        </div>
+        <div class="modal-body" ng-attr-class="cfg.bodyClass">
+            <div>
+                {{cfg.message}}
+            </div>
+        </div>
+        <div class="modal-footer" ng-attr-class="cfg.footerClass">
+            <span class="text-center">
+            <button ng-repeat="btn in cfg.buttons" class="btn btn-default" ng-click="$close(btn.id)">{{btn.text}}</button>
+            </span>
+        </div>
+    </form>
+</div>
+
