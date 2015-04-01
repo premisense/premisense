@@ -1,0 +1,30 @@
+{
+  "mqtt": {
+    "options": {
+      "host": "localhost"
+    }
+  },
+
+
+  "gateways": {
+
+    "2": {
+      "type": "ArduinoSerialGateway",
+      "devices": {
+        "1" : {
+          "initString": "0102010202110200"
+        },
+        "2" : {
+          "initString": "0102020202030202050a02020c1102010b0400"
+        },
+        "4" : {
+          "initString": "0102040202110200"
+        }
+      },
+      "serialPort": "/dev/serial/by-path/platform-bcm2708_usb-usb-0:1.3.5.2:1.0-port0",
+      "initString": "01020002020f0203010302030400",
+      "remoteSSH": "root@as"
+    }
+
+  }
+}
