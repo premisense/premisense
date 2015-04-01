@@ -1,20 +1,25 @@
 {
-  "name": "sensord",
+  "name": "alarmd",
   "version": "0.0.0",
   "author": "",
 
-  "main": "build/sensord.js",
+  "main": "build/alarmd.js",
 
   "dependencies": {
-    "mqtt": "*",
-    "config" : "*",
-    "q": "*",
-    "split": "*",
-    "lodash": "*",
     "through": "*",
+    "mqtt": "*",
+    "sqlite3" : "*",
+    "q": "*",
+    "moment": "*",
+    "compression": "*",
+    "express": "*",
+    "serve-static": "*",
+    "form-data": "*",
+    "lodash": "*",
+    "websocket": "*",
     "yargs": "*",
-    "winston": "*",
-    "serial": "*"
+    "request": "*",
+    "winston": "*"
   },
 
   "devDependencies": {

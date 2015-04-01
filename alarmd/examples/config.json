@@ -1,0 +1,201 @@
+{
+  "mqtt": {
+    "options": {
+      "host": "localhost"
+    }
+  },
+
+
+  "armedStates": {
+    "Disarmed": {
+      "securityLevel": 0,
+      "order": 1,
+      "metadata": {
+        "icon": "${protocol}://${host}/resources/disarmed.png"
+      }
+    },
+    "Home": {
+      "securityLevel": 1,
+      "order": 2,
+      "timeout": 10,
+      "sirenDelay": 60,
+      "metadata": {
+        "icon": "${protocol}://${host}/resources/home.png"
+      }
+    },
+    "Away": {
+      "securityLevel": 2,
+      "order": 3,
+      "timeout": 90,
+      "sirenDelay": 60,
+      "metadata": {
+        "armingSound": "${protocol}://${host}/resources/Loud_Alarm_Clock.mp3",
+        "icon": "${protocol}://${host}/resources/haway.png"
+      }
+    }
+  },
+
+
+  "groups": {
+    "homeSensors": {
+      "groups": ["all", "Home"]
+    },
+    "awaySensors": {
+      "groups": ["all", "Away"]
+    },
+    "firstFloor": {
+      "groups": ["awaySensors"]
+    },
+    "ground": {
+      "groups": ["awaySensors"]
+    },
+    "basement": {
+      "groups": ["awaySensors"]
+    },
+    "outdoorFirstFloor": {
+      "groups": ["awaySensors"]
+    },
+    "outdoorBack": {
+      "groups": ["awaySensors"]
+    },
+    "outdoorFront": {
+      "groups": ["awaySensors"]
+    }
+  },
+
+  "auth": {
+    "bypassAuthIps": {
+      "127.0.0.1": true,
+      "::ffff:127.0.0.1": true
+    },
+    "users": {
+      "me": {
+        "name": "my name",
+        "password": "test",
+        "pinCode": "1234",
+        "forcePinCode": true,
+        "metadata": {
+          "some": "data"
+        }
+      }
+    }
+  },
+
+
+  "hubs": {
+
+    "1": {
+      "type": "mqtt",
+      "topic": "/sensor/1/1/state",
+      "sensors": {
+
+        "Alarm_SW_Basement_Stairs": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 2,
+          "name": "Basement Stairs",
+          "groups": ["basement"]
+        },
+        "Alarm_SW_OutdoorFront_NorthCorridor": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 3,
+          "name": "North Corridor",
+          "groups": ["outdoorFront"]
+        },
+        "Alarm_SW_OutdoorFirstFloor_SirenTamper": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 4,
+          "name": "Siren Tamper",
+          "groups": ["outdoorFirstFloor", "tamper"]
+        },
+        "Alarm_SW_Outdoor_SouthWall": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 5,
+          "name": "South Wall",
+          "groups": ["outdoorFront"]
+        },
+        "Alarm_SW_FirstFloor_Stairs": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 6,
+          "name": "Up Stairs",
+          "groups": ["firstFloor", "firstFloorTablet"]
+        },
+        "Alarm_SW_OutdoorFront_Parking": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 7,
+          "name": "Parking",
+          "groups": ["outdoorFront", "delayedSiren", "delayedArmed"]
+        },
+        "Alarm_SW_OutdoorFront_ParkingDoor": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 8,
+          "name": "Parking Door",
+          "groups": ["outdoorFront"]
+        },
+        "Alarm_SW_OutdoorBack_PoolToilets": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 9,
+          "name": "Pool Toilets",
+          "groups": ["outdoorBack"]
+        }
+      }
+    },
+
+
+        "2": {
+      "type": "mqtt",
+      "topic": "/sensor/2/1/state",
+      "sensors": {
+
+        "Alarm_SW_OutdoorBack_LoungeDoor": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 5,
+          "name": "Lounge Door",
+          "groups": ["outdoorBack"]
+        },
+        "Alarm_SW_Ground_Corridor": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 6,
+          "name": "Ground Corridor",
+          "groups": ["ground", "delayedSiren", "delayedArmed", "mainTablet"]
+        },
+        "Alarm_SW_Ground_FamilyRoom": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 7,
+          "name": "Ground Family Room",
+          "groups": ["ground"]
+        },
+        "Alarm_SW_FirstFloor_Corridor": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 10,
+          "name": "First Floor Corridor",
+          "groups": ["firstFloor", "monitor"]
+        },
+        "Alarm_SW_Ground_Lounge": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 15,
+          "name": "Lounge",
+          "groups": ["ground", "delayedSiren", "delayedArmed", "mainTablet"]
+        },
+        "Alarm_SW_Basement_Hall": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 16,
+          "name": "Basement Hall",
+          "groups": ["basement"]
+        },
+        "Alarm_SW_OutdoorFront_MainEntrance": {
+          "type": "ArduinoInputPullupSensor",
+          "gpioId": 18,
+          "name": "Main Entrance",
+          "groups": ["outdoorFront", "delayedSiren", "delayedArmed"]
+        }
+      }
+    }
+  },
+
+
+
+
+  "webService": {
+    "port": 8282
+  }
+}

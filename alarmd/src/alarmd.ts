@@ -1,0 +1,491 @@
+///<reference path="externals.d.ts"/>
+import events = require('events')
+import through = require('through')
+import mqtt = require('mqtt')
+import fs = require('fs')
+import tty = require('tty')
+import util = require('util')
+import yargs = require('yargs')
+import _ = require('lodash')
+import winston = require('winston');
+import os = require('os')
+import Q = require('q')
+
+import U = require('./u')
+import itemModule = require('./item')
+import arming = require('./arming')
+import hubModule = require('./hub')
+import auth = require('./auth')
+import serviceModule = require('./service')
+import web_service = require('./web_service')
+import push_notification = require("./push_notification")
+import ruleEngineModule = require('./rule_engine')
+
+import Hub = hubModule.Hub;
+import MqttHub = hubModule.MqttHub;
+
+import logging = require('./logging');
+var logger = new logging.Logger(__filename);
+
+var systemItems = new serviceModule.SystemItems();
+
+//--------------------------------------------------------------------------
+winston.setLevels({
+  debug: 0,
+  info: 1,
+  notice: 2,
+  warning: 3,
+  error: 4,
+  crit: 5,
+  alert: 6,
+  emerg: 7
+});
+winston.addColors({
+  debug: 'green',
+  info: 'cyan',
+  silly: 'magenta',
+  warn: 'yellow',
+  error: 'red'
+});
+
+//--------------------------------------------------------------------------
+//      define command line parser
+//--------------------------------------------------------------------------
+var packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+
+var args:{[key:string]: any } = yargs
+    .usage("Usage: $0 -f config [options]")
+    .help('h')
+    .alias('h', 'help')
+    .option('v', {
+      alias: 'version',
+      demand: false,
+      describe: 'display package version'
+    })
+    .option('d', {
+      alias: 'debug',
+      demand: false,
+      describe: 'debug logging'
+    })
+    .option('l', {
+      alias: 'log',
+      demand: false,
+      describe: 'per module log level. e.g. "-l item:debug"'
+    })
+    .option('q', {
+      alias: 'quiet',
+      demand: false,
+      describe: 'do not log to console'
+    })
+    .option('c', {
+      alias: 'config',
+      demand: false,
+      'default': '/etc/alarmd.conf',
+      describe: 'config file',
+      type: 'string'
+    })
+    .strict()
+    .parse(process.argv)
+  ;
+
+if (args['l']) {
+  var logParams = args['l'];
+  if (!_.isArray(logParams))
+    logParams = [args['l']];
+  _.forEach(logParams, (x:string) => {
+    var params = x.split(':');
+    if (params.length !== 2) {
+      console.error(util.format("invalid log format(%s). expecting ':' separator. example: -l item:info", x));
+      process.exit(1);
+    }
+
+    var w:any = winston;
+    var levelNumber = w.levels[params[1]];
+    if (_.isUndefined(levelNumber)) {
+      console.error(util.format("invalid log format(%s). unknown level", x));
+      process.exit(1);
+    }
+
+    if (!w.moduleLevels)
+      w.moduleLevels = {};
+    w.moduleLevels[params[0].toLowerCase()] = levelNumber;
+  });
+}
+
+if (args['v']) {
+  console.log("v" + packageJson.version);
+  process.exit(0);
+}
+
+var debugLog = (args['d']) ? true : false;
+
+winston.remove(winston.transports.Console);
+if (!args['q']) {
+  var colorize:boolean = tty.isatty(1);
+  winston.add(winston.transports.Console, {level: (debugLog) ? 'debug' : 'info', colorize: colorize});
+
+}
+
+//--------------------------------------------------------------------------
+//      load config file
+//--------------------------------------------------------------------------
+
+var configJson = JSON.parse(fs.readFileSync(args['c'], 'utf8'));
+
+var configError = (msg:string) => {
+  console.error("config error: " + msg);
+  process.exit(1);
+};
+
+
+//--------------------------------------------------------------------------
+//      collection of all groups
+//--------------------------------------------------------------------------
+var groups:{[key:string]: itemModule.Group} = {
+  'all': systemItems.all,
+  'armed': systemItems.armed,
+  'tamper': systemItems.tamper,
+  'delayedSiren': systemItems.delayedSiren,
+  'delayedArmed': systemItems.delayedArmed,
+  'monitor': systemItems.monitor
+};
+
+//--------------------------------------------------------------------------
+//      load mqtt settings
+//--------------------------------------------------------------------------
+logger.debug(util.format("loading mqtt settings"));
+
+if (!configJson['mqtt'])
+  configError("missing mqtt section");
+
+var mqttOptions = configJson['mqtt']['options'];
+if (!mqttOptions)
+  configError("missing mqtt options section");
+
+
+_.defaults(mqttOptions, {
+  clientId: 'alarmd',
+  reconnectPeriod: 1000
+});
+
+var mqttClient:mqtt.Client = mqtt.connect(mqttOptions);
+
+//--------------------------------------------------------------------------
+//      load armed states
+//--------------------------------------------------------------------------
+
+logger.debug(util.format("loading armed states"));
+
+var armedStatesArray:arming.ArmedState[] = [];
+if (!configJson['armedStates'])
+  configError("missing armedStates section");
+
+_.forEach(configJson['armedStates'], (v, k) => {
+
+  logger.debug(util.format("loading armed state: %s", k));
+
+  if (groups[k])
+    configError(util.format("armedState %s is already defined as a group. use a different name"));
+
+  var armedStateOptions:arming.ArmedStateOptions = {
+    id: k,
+    systemItems: systemItems,
+    securityLevel: v['securityLevel'],
+    order: v['order'],
+    timeout: v['timeout'],
+    sirenDelay: v['sirenDelay'],
+    metadata: v['metadata']
+  };
+
+  itemModule.transaction(() => {
+    var armedState = new arming.ArmedState(armedStateOptions);
+    armedStatesArray.push(armedState);
+    groups[k] = armedState;
+  });
+});
+if (armedStatesArray.length == 0)
+  configError("empty armedStates section");
+
+var armedStates;
+itemModule.transaction(() => {
+  armedStates = new arming.ArmedStates({
+    id: 'ArmedStates',
+    armedStates: armedStatesArray
+  });
+});
+
+//--------------------------------------------------------------------------
+//      load groups
+//--------------------------------------------------------------------------
+
+logger.debug(util.format("loading groups"));
+
+if (!configJson['groups'])
+  configError("missing groups section");
+_.forEach(configJson['groups'], (v, k) => {
+  logger.debug(util.format("loading group %s", k));
+
+  if (groups[k])
+    configError(util.format("group %s already exists or is a system group", k));
+
+  var parentGroupNames:string[] = v['groups'];
+  if (U.isNullOrUndefined(parentGroupNames))
+    parentGroupNames = [];
+  if (!_.isArray(parentGroupNames))
+    configError(util.format("group %s: groups must be an array", k));
+
+  var parentGroups:itemModule.Group[] = [];
+  _.forEach(parentGroupNames, (g) => {
+    if (!groups[g])
+      configError(util.format("group: %s: group %s is not defined", k, g));
+    parentGroups.push(groups[g]);
+  });
+  var groupOptions:itemModule.ItemOptions = {
+    id: k,
+    name: v['name'],
+    groups: _.uniq(parentGroups),
+    metadata: v['metadata'],
+    disabled: v['disabled']
+  };
+
+  itemModule.transaction(() => {
+    var group = new itemModule.Group(groupOptions);
+    groups[group.id] = group;
+  });
+});
+
+//--------------------------------------------------------------------------
+//      load hubs & sensors
+//--------------------------------------------------------------------------
+var allSensors:{[key:string]: itemModule.Item} = {};
+var hubs:hubModule.Hub[] = [];
+
+
+logger.debug(util.format("loading hubs"));
+
+if (!configJson['hubs'])
+  configError("missing hubs section");
+
+_.forEach(configJson['hubs'], (v, k) => {
+  logger.debug(util.format("loading hub %s", k));
+
+  if (_.filter(hubs, (h) => {
+      return h.id == k
+    }).length > 0)
+    configError(util.format("duplicate hub %s", k));
+
+  var sensorsSection = v['sensors'];
+  if (!_.isObject(sensorsSection))
+    configError(util.format("hub %s: expecting a sensors object", k));
+
+
+  var sensors:itemModule.Sensor[] = [];
+
+  _.forEach(sensorsSection, (sv, sk) => {
+    logger.debug(util.format("loading hub %s, sensor: %s", k, sk));
+
+    if (allSensors[sk.toString()])
+      configError(util.format("hub %s: sensor: %s, already defined", k, sk));
+
+    var sensorName = sv['name'];
+    var groupNames = sv['groups'];
+    var sensorDisabled = sv['disabled'];
+    var sensorMetadata = sv['metadata'];
+
+
+    var sensorGroups:itemModule.Group[] = [];
+
+    if (groupNames) {
+      if (!_.isArray(groupNames))
+        configError(util.format("hub %s: sensor: %s, groups must be an array", k, sk));
+
+      _.forEach(groupNames, (groupName) => {
+        if (!groups[groupName.toString()])
+          configError(util.format("hub %s: sensor: %s, no such group. %s", k, sk, groupName));
+
+        sensorGroups.push(groups[groupName.toString()]);
+
+      });
+    }
+
+    var sensorType = sv['type'];
+    if (sensorType == 'ArduinoInputPullupSensor') {
+      var gpioId = parseInt(sv['gpioId']);
+
+      itemModule.transaction(() => {
+        var item = new itemModule.ArduinoInputPullupSensor({
+          id: sk.toString(),
+          gpioId: gpioId,
+          name: sensorName,
+          groups: sensorGroups,
+          metadata: sensorMetadata,
+          disabled: sensorDisabled == true
+        });
+
+        allSensors[sk.toString()] = item;
+        sensors.push(item);
+      });
+
+    } else {
+      configError(util.format("hub %s: sensor: %s, unknown type", k, sk));
+    }
+  });
+
+  var hubType = v['type'];
+  if (hubType == 'mqtt') {
+    var topic = v['topic'];
+
+    var hub = new MqttHub({
+      id: k.toString(),
+      client: mqttClient,
+      topicRoot: topic,
+      sensors: sensors
+    });
+
+    hubs.push(hub);
+
+  } else {
+    configError(util.format("hub %s: unknown type", k));
+  }
+
+});
+//--------------------------------------------------------------------------
+//      load auth
+//--------------------------------------------------------------------------
+var usersArray:auth.User[] = [];
+var bypassAuthIps:{[key:string]: boolean} = {};
+
+logger.debug(util.format("loading users"));
+
+if (!configJson['auth'])
+  configError("missing auth section");
+
+if (!configJson['auth']['bypassAuthIps'])
+  configError("missing bypassAuthIps section");
+
+_.forEach(configJson['auth']['bypassAuthIps'], (v, k) => {
+  bypassAuthIps[k] = v == true;
+});
+
+if (!configJson['auth']['users'])
+  configError("missing users section");
+_.forEach(configJson['auth']['users'], (v, k) => {
+  logger.debug(util.format("loading user %s", k));
+
+  var userOptions:auth.UserOptions = {
+    id: k,
+    name: v['name'],
+    metadata: v['metadata'],
+    disabled: v['disabled'],
+    password: v['password'],
+    accessRestApi: true,
+    pinCode: v['pinCode'],
+    forcePinCode: v['forcePinCode']
+  };
+
+  itemModule.transaction(() => {
+    var user = new auth.User(userOptions);
+    usersArray.push(user);
+  });
+});
+
+var users:auth.Users;
+
+itemModule.transaction(() => {
+  users = new auth.Users({id: 'Users', users: usersArray, bypassAuthIps: bypassAuthIps});
+});
+
+//--------------------------------------------------------------------------
+//      load web service
+//--------------------------------------------------------------------------
+logger.debug(util.format("loading web service settings"));
+var port:number = 8282;
+
+if (configJson['webService']) {
+  var webServiceSection = configJson['webService'];
+  if (webServiceSection['port'])
+    port = webServiceSection['port'];
+}
+
+var webServiceOptions:web_service.WebServiceOptions = {
+  port: port
+};
+
+var webService:web_service.WebService = new web_service.WebService(webServiceOptions);
+//--------------------------------------------------------------------------
+//      load rules
+//--------------------------------------------------------------------------
+var ruleEngine:ruleEngineModule.RuleEngine;
+
+itemModule.transaction(() => {
+  ruleEngine = new ruleEngineModule.RuleEngine(systemItems);
+});
+
+itemModule.transaction(() => {
+  ruleEngine.loadModule('./builtin_rules');
+});
+
+//TODO load more rules from plugins directory
+
+//--------------------------------------------------------------------------
+
+//TODO load pushNotification
+//TODO load siren
+
+var pushNotification:push_notification.PushNotification = null;
+var siren:itemModule.Siren = null;
+
+//--------------------------------------------------------------------------
+//      initialize the service
+//--------------------------------------------------------------------------
+var serviceOptions:serviceModule.ServiceOptions = {
+  items: systemItems,
+  armedStates: armedStates,
+  siren: siren,
+  users: users,
+  webService: webService,
+  pushNotification: pushNotification,
+  hubs: hubs,
+  ruleEngine: ruleEngine
+};
+
+var service:serviceModule.Service;
+itemModule.transaction(() => {
+  service = new serviceModule.Service(serviceOptions);
+});
+
+//--------------------------------------------------------------------------
+
+process.on('uncaughtException', (err) => {
+  logger.error("uncaught exception: err: %s, stack:%s", err, err.stack);
+  process.exit(1);
+});
+
+logger.debug("waiting for mqtt connection");
+
+var started:boolean = false;
+
+mqttClient.on('connect', () => {
+  if (!started) {
+    started = true;
+    logger.debug("connected to mqtt. starting services...");
+    service.start()
+      .then(() => {
+        logger.info("service started");
+      })
+  } else {
+    logger.info("reconnected to mqtt. re-subscribing to topics...");
+  }
+});
+
+mqttClient.on('disconnect', () => {
+  logger.warn("disconnected from mqtt");
+});
+mqttClient.on('close', () => {
+  logger.warn("mqtt closed connection");
+});
+
+mqttClient.on('error', (err) => {
+  logger.warn("mqtt error: " + err);
+});
+
