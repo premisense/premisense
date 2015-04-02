@@ -21,9 +21,24 @@ function die() {
 )
 
 which socat >/dev/null 2>/dev/null || die "socat is not installed. run apt-get install socat"
+which supervisord >/dev/null 2>/dev/null || die "supervisord is not installed. run apt-get install supervisor"
 
+exit;
 (
 	echo "building"
 	./build.sh
 
+	(
+		echo "installing sensord"
+		./sensord/scripts/install.sh
+
+		echo "installing alarmd"
+		./alarmd/scripts/install.sh
+		
+		echo "installing alarmt"
+		./alarmt/scripts/install.sh
+
+	) | tee install.log
+
 ) | tee ./install.log
+
