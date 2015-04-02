@@ -32,12 +32,9 @@ exit;
 		echo "installing sensord"
 		./sensord/scripts/install.sh
 
-		echo "installing alarmd"
-		./alarmd/scripts/install.sh
+		#echo "installing alarmd"
+		#./alarmd/scripts/install.sh
 		
-		echo "installing alarmt"
-		./alarmt/scripts/install.sh
-
 	) | tee install.log
 
 ) | tee ./install.log
