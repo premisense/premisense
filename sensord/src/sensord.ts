@@ -93,7 +93,12 @@ var configJson = JSON.parse(fs.readFileSync(args['c'], 'utf8'));
 
 var configError = (msg:string) => {
   console.error("config error: " + msg);
-  process.exit(1);
+  process.exit(10);
+};
+
+var cliError = (msg:string) => {
+  console.error("CLI error: " + msg);
+  process.exit(10);
 };
 
 //--------------------------------------------------------------------------

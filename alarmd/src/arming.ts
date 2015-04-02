@@ -100,8 +100,10 @@ export class ArmedState extends Group {
     if (this.timeLeft > 0) {
       Q.delay(500)
         .then(() => {
-          self.notifyChanged();
-          self._checkNotifyChangedTimeLeft();
+          itemModule.transaction(() => {
+            self.notifyChanged();
+            self._checkNotifyChangedTimeLeft();
+          });
         });
     }
   }

@@ -119,7 +119,7 @@ class WouldTrigger extends ruleEngineModule.Rule {
         return;
 
       if (!this.notified[item.id]) {
-        notified[item.id] = true;
+        this.notified[item.id] = true;
         wouldTrigger.push(item);
       }
 
@@ -128,7 +128,7 @@ class WouldTrigger extends ruleEngineModule.Rule {
 
       var now = new Date();
       _.forEach(wouldTrigger, (wtItem) => {
-        var wouldTriggerItem:WouldTriggerItem = this.armedState.wouldTriggerItems[wtItem.id];
+        var wouldTriggerItem:arming.WouldTriggerItem = this.armedState.wouldTriggerItems[wtItem.id];
         if (!wouldTriggerItem) {
           wouldTriggerItem = new arming.WouldTriggerItem(wtItem);
           this.armedState.wouldTriggerItems [wtItem.id] = wouldTriggerItem;

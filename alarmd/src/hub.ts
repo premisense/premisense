@@ -34,25 +34,18 @@ export class Hub {
 
 }
 
-export interface MqttHubOptions extends HubOptions {
-  client:mqtt.Client;
-  topicRoot:string
+export interface MqttHubDeviceOptions {
+  id:string;
   sensors:Sensor[];
 }
 
-export class MqttHub extends Hub {
-  private mqttClient : mqtt.Client;
-  private topicRoot:string;
+export class MqttHubDevice {
+  id: string;
   private _sensors:{[key: number]: Sensor} = {};
   private _items:{[key: string]: Sensor} = {};
 
-  constructor(o:MqttHubOptions) {
-
-    super(o);
-    this.mqttClient = o.client;
-    this.topicRoot = o.topicRoot;
-    if (this.topicRoot[this.topicRoot.length-1] !== '/')
-      this.topicRoot += '/';
+  constructor(o:MqttHubDeviceOptions) {
+    this.id = o.id;
 
     _.forEach(o.sensors, (sensor) => {
       assert (_.isUndefined(this._sensors[sensor.gpioId]));
@@ -62,8 +55,7 @@ export class MqttHub extends Hub {
       this._items[sensor.id] = sensor;
     });
   }
-
-  private processMessage(topicParts:string[], payload:string):void {
+  processMessage(topicParts:string[], payload:string):void {
     var gpioId : number = parseInt(topicParts[topicParts.length-1]);
     var item = this._sensors[gpioId];
     assert (item == null || item instanceof Sensor);
@@ -75,6 +67,36 @@ export class MqttHub extends Hub {
       });
     }
   }
+}
+
+export interface MqttHubOptions extends HubOptions {
+  client:mqtt.Client;
+  topicRoot:string
+  devices:MqttHubDevice[];
+}
+
+export class MqttHub extends Hub {
+  private mqttClient : mqtt.Client;
+  private topicRoot:string;
+  private devices:MqttHubDevice[];
+
+  constructor(o:MqttHubOptions) {
+
+    super(o);
+    this.mqttClient = o.client;
+    this.topicRoot = o.topicRoot;
+    this.devices = o.devices;
+    if (this.topicRoot[this.topicRoot.length-1] !== '/')
+      this.topicRoot += '/';
+  }
+
+  private processMessage(topicParts:string[], payload:string):void {
+    _.forEach(this.devices, (device) => {
+      if (device.id === topicParts[0]) {
+        device.processMessage(topicParts, payload);
+      }
+    }, this);
+  }
 
   start():Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
@@ -82,7 +104,7 @@ export class MqttHub extends Hub {
     logger.debug("MqttHub(%s): starting", this.id);
 
     var self = this;
-    var topic = this.topicRoot + "+";
+    var topic = util.format("%s+/state/+", this.topicRoot);
 
     logger.debug("MqttHub(%s): subscribing to topic: %s", this.id, topic);
 

@@ -389,11 +389,11 @@ export class WebService {
       return true;
 
     if (pinCode == null) {
-      res.status(401).send("authorization required");
+      res.status(403).send("authorization required");
       return false;
     }
 
-    res.status(401).send("invalid pin code");
+    res.status(403).send("invalid pin code");
     return false;
   }
 

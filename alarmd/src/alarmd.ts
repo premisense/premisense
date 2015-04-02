@@ -278,62 +278,74 @@ _.forEach(configJson['hubs'], (v, k) => {
     }).length > 0)
     configError(util.format("duplicate hub %s", k));
 
-  var sensorsSection = v['sensors'];
-  if (!_.isObject(sensorsSection))
-    configError(util.format("hub %s: expecting a sensors object", k));
+  var devicesSection = v['devices'];
+  if (!_.isObject(devicesSection))
+    configError(util.format("hub %s: expecting a devices object", k));
 
 
-  var sensors:itemModule.Sensor[] = [];
+  var devices:hubModule.MqttHubDevice[] = [];
 
-  _.forEach(sensorsSection, (sv, sk) => {
-    logger.debug(util.format("loading hub %s, sensor: %s", k, sk));
+  _.forEach(devicesSection, (dv, dk) => {
+    var sensors:itemModule.Sensor[] = [];
 
-    if (allSensors[sk.toString()])
-      configError(util.format("hub %s: sensor: %s, already defined", k, sk));
+    _.forEach(dv, (sv, sk) => {
+      logger.debug(util.format("loading hub %s, device:%s, sensor: %s", k, dk, sk));
 
-    var sensorName = sv['name'];
-    var groupNames = sv['groups'];
-    var sensorDisabled = sv['disabled'];
-    var sensorMetadata = sv['metadata'];
+      if (allSensors[sk.toString()])
+        configError(util.format("hub %s: device:%s, sensor: %s, already defined", k, dk, sk));
+
+      var sensorName = sv['name'];
+      var groupNames = sv['groups'];
+      var sensorDisabled = sv['disabled'];
+      var sensorMetadata = sv['metadata'];
 
 
-    var sensorGroups:itemModule.Group[] = [];
+      var sensorGroups:itemModule.Group[] = [];
 
-    if (groupNames) {
-      if (!_.isArray(groupNames))
-        configError(util.format("hub %s: sensor: %s, groups must be an array", k, sk));
+      if (groupNames) {
+        if (!_.isArray(groupNames))
+          configError(util.format("hub %s: device:%s, sensor: %s, groups must be an array", k, dk, sk));
 
-      _.forEach(groupNames, (groupName) => {
-        if (!groups[groupName.toString()])
-          configError(util.format("hub %s: sensor: %s, no such group. %s", k, sk, groupName));
+        _.forEach(groupNames, (groupName) => {
+          if (!groups[groupName.toString()])
+            configError(util.format("hub %s: device:%s, sensor: %s, no such group. %s", k, dk, sk, groupName));
 
-        sensorGroups.push(groups[groupName.toString()]);
+          sensorGroups.push(groups[groupName.toString()]);
 
-      });
-    }
+        });
+      }
 
-    var sensorType = sv['type'];
-    if (sensorType == 'ArduinoInputPullupSensor') {
-      var gpioId = parseInt(sv['gpioId']);
+      var sensorType = sv['type'];
+      if (sensorType == 'ArduinoInputPullupSensor') {
+        var gpioId = parseInt(sv['gpioId']);
 
-      itemModule.transaction(() => {
-        var item = new itemModule.ArduinoInputPullupSensor({
-          id: sk.toString(),
-          gpioId: gpioId,
-          name: sensorName,
-          groups: sensorGroups,
-          metadata: sensorMetadata,
-          disabled: sensorDisabled == true
+        itemModule.transaction(() => {
+          var item = new itemModule.ArduinoInputPullupSensor({
+            id: sk.toString(),
+            gpioId: gpioId,
+            name: sensorName,
+            groups: sensorGroups,
+            metadata: sensorMetadata,
+            disabled: sensorDisabled == true
+          });
+
+          allSensors[sk.toString()] = item;
+          sensors.push(item);
         });
 
-        allSensors[sk.toString()] = item;
-        sensors.push(item);
-      });
+      } else {
+        configError(util.format("hub %s: device:%s, sensor: %s, unknown type", k, dk, sk));
+      }
+    });
 
-    } else {
-      configError(util.format("hub %s: sensor: %s, unknown type", k, sk));
-    }
+    var device = new hubModule.MqttHubDevice({
+      id: dk,
+      sensors: sensors
+    });
+
+    devices.push(device);
   });
+
 
   var hubType = v['type'];
   if (hubType == 'mqtt') {
@@ -343,7 +355,7 @@ _.forEach(configJson['hubs'], (v, k) => {
       id: k.toString(),
       client: mqttClient,
       topicRoot: topic,
-      sensors: sensors
+      devices: devices
     });
 
     hubs.push(hub);
