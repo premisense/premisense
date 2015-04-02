@@ -345,8 +345,6 @@ export class RuleEngine extends itemModule.Group {
         rule.subscribe(item);
       });
     });
-
-    return rules;
   }
 
   start():Q.Promise<boolean> {

@@ -10,6 +10,7 @@ import _ = require('lodash')
 import winston = require('winston');
 import os = require('os')
 import Q = require('q')
+import express = require('express')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -95,15 +96,13 @@ if (args['l']) {
   _.forEach(logParams, (x:string) => {
     var params = x.split(':');
     if (params.length !== 2) {
-      console.error(util.format("invalid log format(%s). expecting ':' separator. example: -l item:info", x));
-      process.exit(1);
+      cliError(util.format("invalid log format(%s). expecting ':' separator. example: -l item:info", x));
     }
 
     var w:any = winston;
     var levelNumber = w.levels[params[1]];
     if (_.isUndefined(levelNumber)) {
-      console.error(util.format("invalid log format(%s). unknown level", x));
-      process.exit(1);
+      cliError(util.format("invalid log format(%s). unknown level", x));
     }
 
     if (!w.moduleLevels)
@@ -134,7 +133,12 @@ var configJson = JSON.parse(fs.readFileSync(args['c'], 'utf8'));
 
 var configError = (msg:string) => {
   console.error("config error: " + msg);
-  process.exit(1);
+  process.exit(10);
+};
+
+var cliError = (msg:string) => {
+  console.error("CLI error: " + msg);
+  process.exit(10);
 };
 
 
@@ -412,6 +416,13 @@ var webServiceOptions:web_service.WebServiceOptions = {
 };
 
 var webService:web_service.WebService = new web_service.WebService(webServiceOptions);
+
+if (configJson['webService']) {
+  var webServiceSection = configJson['webService'];
+  _.forEach(webServiceSection['serve-static'], (v, k) => {
+    webService.app.use(k, express.static(v['root'], v['options']));
+  });
+}
 //--------------------------------------------------------------------------
 //      load rules
 //--------------------------------------------------------------------------
