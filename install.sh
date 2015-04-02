@@ -20,6 +20,8 @@ function die() {
 	fi
 )
 
+which socat >/dev/null 2>/dev/null || die "socat is not installed. run apt-get install socat"
+
 (
 	echo "building"
 	./build.sh
