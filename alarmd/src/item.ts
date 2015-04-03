@@ -4,6 +4,7 @@ import eventsModule = require('events')
 import assert = require('assert')
 import through = require('through')
 import _ = require('lodash')
+import mqtt = require('mqtt')
 
 import U = require('./u')
 import logging = require('./logging');
@@ -598,8 +599,10 @@ export class ArduinoInputAnalogSensor extends ArduinoSensor {
 
 export interface SirenOptions extends ItemOptions {
   maxActiveTime?:number;
-  activateUri ?:string;
-  deactivateUri ?:string;
+  mqttClient:mqtt.Client;
+  topic:string;
+  activateCommand:string;
+  deactivateCommand:string;
 }
 
 export class Siren extends Item {
@@ -607,11 +610,11 @@ export class Siren extends Item {
   private _lastActive:Date = null;
   private _timeLeftToNextState:number = 0;
   private _nextStateTime:Date = null;
-  private  _maxActiveTime:number;
-  private _activateUri:string;
-  private _deactivateUri:string;
-  private _pendingUpdates:through.ThroughStream = through();
-
+  private mqttClient : mqtt.Client;
+  private _maxActiveTime:number;
+  private _topic:string;
+  private _activateCommand:string;
+  private _deactivateCommand:string;
 
   isActive():boolean {
     return this._active;
@@ -632,7 +635,9 @@ export class Siren extends Item {
   _checkNotifyChangedTimeLeft():void {
     if (this.timeLeftToNextState > 0) {
       setTimeout(() => {
-        this.notifyChanged();
+        transaction(() => {
+          this.notifyChanged();
+        }, this);
         this._checkNotifyChangedTimeLeft();
       }, 500);
     }
@@ -641,44 +646,10 @@ export class Siren extends Item {
   constructor(o:SirenOptions) {
     super(o);
     this._maxActiveTime = !U.isNullOrUndefined(o.maxActiveTime) ? o.maxActiveTime : 10 * 60;
-    this._activateUri = o.activateUri;
-    this._deactivateUri = o.deactivateUri;
-
-    //TODO fix siren code
-    /*
-     var self:Siren = this;
-     this._pendingUpdates.on("data", (uri: string) => {
-     self._pendingUpdate.pause ();
-     });
-     Event
-
-     StreamSubscription<Uri> sub;
-     sub = pendingUpdates.stream.listen((uri) {
-     sub.pause();
-
-     return new HttpClient().getUrl(uri)
-     .then((HttpClientRequest request) {
-     return request.close();
-     }, onError: (e) {
-     log.shout("siren request failed. error:", e);
-     })
-     .then((HttpClientResponse response) {
-     if (response == null) {
-     log.shout("siren request failed. response == null");
-     } else if (response.statusCode == 200) {
-     response.transform(UTF8.decoder).listen((contents) {
-     log.info("siren request result. $contents");
-     }, onError: (e) {
-     log.shout("siren request failed. error:", e);
-     });
-     }
-     })
-     .whenComplete(() {
-     log.info("siren request completed");
-     sub.resume();
-     });
-     });
-     */
+    this.mqttClient = o.mqttClient;
+    this._topic = o.topic;
+    this._activateCommand = o.activateCommand;
+    this._deactivateCommand = o.deactivateCommand;
   }
 
   get active():boolean {
@@ -712,14 +683,14 @@ export class Siren extends Item {
         this._lastActive = now;
       this._timeLeftToNextState = newTimeLeftToNextState;
 
-      if (this._active != active) {
+      if (this._active != active && !U.isNullOrUndefined(this.mqttClient) && !U.isNullOrUndefined(this._topic) && this._topic.length > 0) {
         if (active) {
-          if (this._activateUri != null)
-            this._pendingUpdates.push(this._activateUri);
+          if (!U.isNullOrUndefined(this._activateCommand) && this._activateCommand.length > 0) {
+            this.mqttClient.publish(this._topic, this._activateCommand);
+          }
+        } else if (!U.isNullOrUndefined(this._deactivateCommand) && this._deactivateCommand.length > 0) {
+          this.mqttClient.publish(this._topic, this._deactivateCommand);
         }
-        else if (this._deactivateUri != null)
-          this._pendingUpdates.push(this._deactivateUri);
-
       }
 
       this._active = active;
@@ -731,7 +702,7 @@ export class Siren extends Item {
       this._checkNotifyChangedTimeLeft();
 
       this.notifyChanged();
-    });
+    }, this);
   }
 
   deactivate():void {
@@ -762,16 +733,8 @@ export class ItemEvents {
   //private _items:Item[];
   private ringSize:number = 1000;
   private activeStreams:through.ThroughStream[] = [];
-  //private events:EventEmitter = new EventEmitter();
 
   constructor() {
-    //this._items = items;
-    //this.ringSize = ringSize;
-    //_.forEach(items, (item) => {
-    //  item.on("event", (event) => {
-    //    this._handleEvent(event);
-    //  });
-    //}, this);
   }
 
   addItem(item:Item) : void {

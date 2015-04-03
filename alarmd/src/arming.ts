@@ -9,6 +9,7 @@ import _ = require('lodash')
 import U = require('./u')
 import itemModule = require('./item')
 import service = require('./service')
+import event_log = require('./event_log');
 
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -73,12 +74,13 @@ export class ArmedState extends Group {
   private securityLevel:number;
   private order:number;
   private timeout:number;
-  private sirenDelay:number = 0;
+  public sirenDelay:number = 0;
   private _startTime:Date = null;
-   lastSiren:Date = null;
+  lastSiren:Date = null;
   triggeredItems:{[key:string]: TriggeredItem} = {};
-   wouldTriggerItems:{[key:string]: WouldTriggerItem} = {};
+  wouldTriggerItems:{[key:string]: WouldTriggerItem} = {};
   bypassedItems:{[key:string]: Item} = {};
+  static logEvent:event_log.Event = null;
 
   constructor(o:ArmedStateOptions) {
     super(o);
@@ -162,6 +164,9 @@ export class ArmedState extends Group {
 
       self._clear();
       self.startTime = new Date(Date.now() + 1000 * this.timeout);
+      ArmedState.logEvent = null;
+
+      self.updateLogEvent();
     });
 
     deferred.resolve(true);
@@ -196,10 +201,54 @@ export class ArmedState extends Group {
   }
 
   updateLogEvent():void {
-//TODO add updateLogEvent
-    this.notifyChanged();
-  }
+    var persist:boolean = false;
+    if (_.isNull(ArmedState.logEvent)) {
+      persist = true;
+      ArmedState.logEvent = new event_log.Event({
+        type: "arming",
+        message: "armed",
+        severity: event_log.Severity.INFO,
+        user: null,
+        data: {}
+      });
+    }
 
+    var curData = ArmedState.logEvent.data;
+    var curDataStr = JSON.stringify(curData);
+
+    var newData = this.toJson();
+    if (newData['armingTimeLeft'] == 0 && !U.isNullOrUndefined(curData['wouldTriggerItems']))
+      newData['wouldTriggerItems'] = curData['wouldTriggerItems'];
+
+    delete newData['name'];
+    delete newData['securityLevel'];
+    delete newData['armingTimeout'];
+    delete newData['armingTimeLeft'];
+    delete newData['type'];
+    delete newData['active'];
+    delete newData['metadata'];
+
+
+    if (U.isNullOrUndefined(newData['triggeredItems']) && Object.keys(newData['triggeredItems']).length > 0) {
+      ArmedState.logEvent.severity = event_log.Severity.ALERT;
+      newData['severity'] = event_log.Severity.ALERT;
+    } else if (U.isNullOrUndefined(newData['wouldTriggerItems']) && Object.keys(newData['wouldTriggerItems']).length > 0) {
+      ArmedState.logEvent.severity = event_log.Severity.NOTICE;
+      newData['severity'] = event_log.Severity.NOTICE;
+    }
+
+    var newDataStr =  JSON.stringify(newData);
+
+
+    if (newDataStr !== curDataStr) {
+      ArmedState.logEvent.data = newData;
+      persist = true;
+    }
+
+    if (persist) {
+      service.Service.instance.eventLog.log(ArmedState.logEvent);
+    }
+  }
 }
 
 export interface ArmedStatesOptions extends ItemOptions {
@@ -277,8 +326,6 @@ export class ArmedStates extends Group {
     }
     return deferred.promise;
   }
-
-//TODO add eventLog
 }
 
 

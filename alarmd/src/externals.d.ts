@@ -12,12 +12,14 @@
 ///<reference path="../typings/mocha/mocha.d.ts"/>
 ///<reference path="../typings/yargs/yargs.d.ts"/>
 ///<reference path="../typings/moment/moment.d.ts"/>
+///<reference path="../typings/sqlite3/sqlite3.d.ts"/>
 
 declare module "mqtt" {
   import eventsModule = require('events')
 
   export class Client extends eventsModule.EventEmitter {
     subscribe(...params : any[]) : Client;
+    publish(topic:string, message:string, opts ?:any, callback ?: any) : Client;
   }
 
   function connect(options: any) : Client;

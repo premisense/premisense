@@ -13,6 +13,7 @@ import arming = require('./arming')
 import auth = require('./auth')
 import web_service = require('./web_service')
 import push_notification = require('./push_notification')
+import event_log = require('./event_log')
 import rule_engine = require('./rule_engine')
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -83,6 +84,7 @@ export class ServiceOptions {
   pushNotification:PushNotification;
   hubs:Hub[];
   ruleEngine:RuleEngine;
+  eventLog:event_log.EventLog;
 }
 
 export class Service {
@@ -96,9 +98,10 @@ export class Service {
   private _items:SystemItems;
   private _hubs:Hub[];
   private _armedStates:ArmedStates;
-  private siren:Siren;
+  private _siren:Siren;
   private _users:auth.Users;
   private _ruleEngine:RuleEngine;
+  private _eventLog:event_log.EventLog;
 
   private _pushNotification:PushNotification;
   private  webService:WebService;
@@ -129,6 +132,14 @@ export class Service {
     return this._items;
   }
 
+  get siren():Siren {
+    return this._siren;
+  }
+
+  get eventLog():event_log.EventLog {
+    return this._eventLog;
+  }
+
   constructor(o:ServiceOptions) {
     assert(Service._instance == null);
     Service._instance = this;
@@ -138,10 +149,11 @@ export class Service {
     this._armedStates = o.armedStates;
     this.webService = o.webService;
     this._users = o.users;
-    this.siren = o.siren;
+    this._siren = o.siren;
     this._armedStates.addParent(o.items.all);
     this._ruleEngine = o.ruleEngine;
     this._pushNotification = o.pushNotification;
+    this._eventLog = o.eventLog;
   }
 
   start():Q.Promise<boolean> {
@@ -149,38 +161,52 @@ export class Service {
 
     var self = this;
 
-    logger.info("activating armedState:%s", this.armedStates.states[0].name);
-    this.armedStates.states[0].activate()
-      .then(() => {
+    this.eventLog.start()
+      .then((result) => {
+        if (!result) {
+          deferred.resolve(false);
+        } else {
 
-        var startHubs:Q.Promise<boolean>[] = [];
+          logger.info("activating armedState:%s", this.armedStates.states[0].name);
+          this.armedStates.states[0].activate()
+            .then(() => {
 
-        logger.debug("starting hubs...");
+              var startHubs:Q.Promise<boolean>[] = [];
 
-        _.forEach(self._hubs, (hub) => {
-          startHubs.push(hub.start());
-        }, self);
+              logger.debug("starting hubs...");
 
-        Q.allSettled(startHubs)
-          .then(() => {
+              _.forEach(self._hubs, (hub) => {
+                startHubs.push(hub.start());
+              }, self);
 
-            logger.debug("starting rule engine...");
-            self._ruleEngine.start()
-              .then(() => {
+              Q.allSettled(startHubs)
+                .then(() => {
 
-                logger.debug("starting web service...");
+                  logger.debug("starting rule engine...");
+                  self._ruleEngine.start()
+                    .then(() => {
 
-                self.webService.start()
-                  .then(() => {
+                      logger.debug("starting web service...");
 
-                    // first run
-                    self._ruleEngine.run();
+                      self.webService.start()
+                        .then(() => {
 
-                    deferred.resolve(true);
-                  });
-              });
-          });
+                          // first run
+                          self._ruleEngine.run();
 
+                          this.eventLog.log(new event_log.Event({
+                            type: 'service',
+                            message: 'started',
+                            user: null,
+                            severity: event_log.Severity.INFO
+                          }));
+
+                          deferred.resolve(true);
+                        });
+                    });
+                });
+            });
+        }
       });
 
     return deferred.promise;

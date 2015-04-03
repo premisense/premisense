@@ -21,6 +21,7 @@ import serviceModule = require('./service')
 import web_service = require('./web_service')
 import push_notification = require("./push_notification")
 import ruleEngineModule = require('./rule_engine')
+import event_log = require('./event_log')
 
 import Hub = hubModule.Hub;
 import MqttHub = hubModule.MqttHub;
@@ -455,8 +456,16 @@ itemModule.transaction(() => {
 //TODO load pushNotification
 //TODO load siren
 
+//TODO load siren options from config
 var pushNotification:push_notification.PushNotification = null;
-var siren:itemModule.Siren = null;
+var siren:itemModule.Siren = new itemModule.Siren({
+  id: 'Siren',
+  maxActiveTime: 10*60,
+  mqttClient: mqttClient,
+  topic: "/command/2",
+  activateCommand: "0105020b000000138801",
+  deactivateCommand: "0104020b01"
+});
 
 //--------------------------------------------------------------------------
 //      initialize the service
@@ -469,7 +478,8 @@ var serviceOptions:serviceModule.ServiceOptions = {
   webService: webService,
   pushNotification: pushNotification,
   hubs: hubs,
-  ruleEngine: ruleEngine
+  ruleEngine: ruleEngine,
+  eventLog: new event_log.EventLog()
 };
 
 var service:serviceModule.Service;
@@ -491,10 +501,15 @@ var started:boolean = false;
 mqttClient.on('connect', () => {
   if (!started) {
     started = true;
-    logger.debug("connected to mqtt. starting services...");
+    logger.debug("connected to mqtt. starting service...");
     service.start()
-      .then(() => {
-        logger.info("service started");
+      .then((result) => {
+        if (result)
+          logger.info("service started");
+        else {
+          logger.info("failed to start service. exiting");
+          process.exit(1);
+        }
       })
   } else {
     logger.info("reconnected to mqtt. re-subscribing to topics...");

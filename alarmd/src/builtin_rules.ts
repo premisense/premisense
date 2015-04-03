@@ -173,9 +173,95 @@ ruleEngineModule.defineRule({ruleClass: NotifyMonitor.prototype, depends: ['moni
 
 //---------------------------------------------------------------------------------------------------------------------
 class ActivateSiren extends ruleEngineModule.Rule {
+  armedState:arming.ArmedState = serviceModule.Service.instance.armedStates.active;
+  notified:{[key:string]:boolean} = {};
+  arm:Arm = this.getRule(Arm.prototype);
+  prevTimeLeftToNextState:number = 0;
+
+  activateSiren():void {
+    serviceModule.Service.instance.siren.activate();
+    this.armedState.lastSiren = new Date();
+    this.armedState.notifyChanged();
+  }
+
+  checkDispatchNotification():void {
+    if (!serviceModule.Service.instance.siren.isActive())
+      return;
+
+    var toNotify = {};
+
+    _.forEach(this.armedState.triggeredItems, (v, k)=> {
+      if (this.notified[k])
+        return;
+      this.notified[k] = true;
+      toNotify[k] = true;
+    }, this);
+
+    _.forEach(this.arm.armedDetected, (item)=> {
+      if (this.armedState.bypassedItems[item.id])
+        return;
+      if (this.notified[item.id])
+        return;
+      this.notified[item.id] = true;
+      toNotify[item.id] = true;
+    }, this);
+
+    if (Object.keys(toNotify).length > 0 && serviceModule.Service.instance.pushNotification != null) {
+      //TODO change priority to CRITICAL (after debugging)
+      //TODO fixme serviceModule.Service.instance.pushNotification.send(new Message ("Siren !!!", "Sensors: ${toNotify.join('\n')}", priority: Priority.HIGH));
+    }
+
+  }
 
   run():void {
-    logger.info("here");
+    if (serviceModule.Service.instance.armedStates.active != this.armedState) {
+      this.armedState = serviceModule.Service.instance.armedStates.active;
+      this.notified = {};
+      this.prevTimeLeftToNextState = 0;
+      serviceModule.Service.instance.siren.deactivate();
+    }
+
+    if (serviceModule.Service.instance.siren.timeLeftToNextState > 0)
+      this.prevTimeLeftToNextState = serviceModule.Service.instance.siren.timeLeftToNextState;
+    else if (this.prevTimeLeftToNextState > 0) {
+      this.prevTimeLeftToNextState = 0;
+      if (serviceModule.Service.instance.siren.isActive())
+        serviceModule.Service.instance.siren.deactivate();
+      else
+        this.activateSiren();
+      return;
+    }
+
+    this.checkDispatchNotification();
+
+    if (serviceModule.Service.instance.siren.isActive())
+      return;
+
+    var delayedSensors = {};
+    var nonDelayedSensors = {};
+
+    if (this.armedState.timeLeft == 0) {
+      var activate:boolean = false;
+      var delayed:boolean = false;
+
+      _.forEach(this.arm.armedDetected, (item) => {
+        if (!this.armedState.bypassedItems[item.id]) {
+          if (serviceModule.Service.instance.items.delayedSiren.containsItem(item))
+            delayedSensors[item.id] = true;
+          else
+            nonDelayedSensors[item.id] = true;
+        }
+      }, this);
+
+      if (Object.keys(nonDelayedSensors).length > 0 || Object.keys(delayedSensors).length > 0 && this.armedState.sirenDelay == 0) {
+        logger.info("Activating Siren now. sensors: %s", _.union(Object.keys(nonDelayedSensors), Object.keys(delayedSensors)).join('\n'));
+        this.activateSiren();
+      }
+      else if (Object.keys(delayedSensors).length > 0 && serviceModule.Service.instance.siren.timeLeftToNextState == 0) {
+        logger.info("Activating Siren in %s, sensors: %s", this.armedState.sirenDelay, Object.keys(delayedSensors).join('\n'));
+        serviceModule.Service.instance.siren.scheduleActivate(this.armedState.sirenDelay);
+      }
+    }
   }
 }
 ruleEngineModule.defineRule({ruleClass: ActivateSiren.prototype, depends: ['ArmedStates', 'Arm']});
