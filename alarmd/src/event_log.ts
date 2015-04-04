@@ -25,7 +25,7 @@ export interface EventOptions {
   type:string;
   message:string;
   severity:Severity;
-  user:auth.User;
+  user:string;
   time ?: Date;
   data ?: any;
 }
@@ -51,7 +51,7 @@ export class Event {
     this._type = o.type;
     this._message = o.message;
     this._severity = o.severity;
-    this._user = U.isNullOrUndefined(o.user) ? serviceModule.Service.instance.users.getAdmin().name : o.user.name;
+    this._user = U.isNullOrUndefined(o.user) ? serviceModule.Service.instance.users.getAdmin().name : o.user;
     this._time = o.time || new Date();
     this._data = o.data;
   }
@@ -76,7 +76,7 @@ export class Event {
     return this._data;
   }
 
-  set data(d : any) {
+  set data(d:any) {
     this._data = d;
   }
 
@@ -86,6 +86,18 @@ export class Event {
 
   set severity(s:Severity) {
     this._severity = s;
+  }
+
+  toJson():any {
+    var ret:any = {
+      'type': this._type,
+      'message': this._message,
+      'time': this._time,
+      'severity': this._severity,
+      'data': this._data,
+      'user': this._user
+    };
+    return ret;
   }
 }
 
@@ -134,21 +146,64 @@ export class EventLog extends itemModule.Item {
     return deferred.promise;
   }
 
-  log(event:Event):void {
+  log(event:Event):Q.Promise<boolean> {
+    var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
+
     var sql = "insert into event_log\n"
       + "(eventTime, eventType, eventMessage, eventSeverity, eventUser, eventData)\n"
       + "values(?, ?, ?, ?, ?, ?)";
 
     var dataStr = JSON.stringify(event.data);
     var self = this;
-    this.database.run(sql, Event.getUniqueTime(event.time), event.type, event.message, event.severity, event.user,dataStr, (err)=> {
+    this.database.run(sql, Event.getUniqueTime(event.time), event.type, event.message, event.severity, event.user, dataStr, (err)=> {
       if (err) {
         logger.error("failed to insert event_log record to database. error:", err);
+        deferred.reject(false);
       } else {
         itemModule.transaction(() => {
           self.modified += 1;
         });
+        deferred.resolve(true);
       }
     });
+    return deferred.promise;
+  }
+
+  query():Q.Promise<Event[]> {
+    var deferred:Q.Deferred<Event[]> = Q.defer<Event[]>();
+    var self = this;
+
+    var events:Event[] = [];
+
+    var sql:string = "select * from event_log";
+//  public each(sql: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void): Database;
+
+    self.database.each(sql, (err, row) => {
+      if (err) {
+        logger.error("failed to retrieve record from event_log. error:", err);
+      } else {
+        var data = null;
+        if (!U.isNullOrUndefined(row.eventData))
+          data = JSON.parse(row.eventData);
+        var event:Event = new Event({
+          type: row.eventType,
+          message: row.eventMessage,
+          severity: row.eventSeverity,
+          user: row.eventUser,
+          time: row.eventTime,
+          data: data
+        });
+        events.push(event);
+      }
+    }, (err, count) => {
+      if (err) {
+        logger.error("failed to retrieve records from event_log. error:", err);
+        deferred.reject("failed");
+      } else {
+        deferred.resolve(events);
+      }
+    });
+
+    return deferred.promise;
   }
 }

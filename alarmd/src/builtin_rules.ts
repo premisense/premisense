@@ -10,6 +10,7 @@ import ruleEngineModule = require('./rule_engine')
 import serviceModule = require('./service')
 import itemModule = require('./item')
 import arming = require('./arming')
+import push_notification = require('./push_notification')
 
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -208,7 +209,11 @@ class ActivateSiren extends ruleEngineModule.Rule {
 
     if (Object.keys(toNotify).length > 0 && serviceModule.Service.instance.pushNotification != null) {
       //TODO change priority to CRITICAL (after debugging)
-      //TODO fixme serviceModule.Service.instance.pushNotification.send(new Message ("Siren !!!", "Sensors: ${toNotify.join('\n')}", priority: Priority.HIGH));
+      serviceModule.Service.instance.pushNotification.send(new push_notification.Message({
+        title: "Siren !!!",
+        body: util.format("Sensors: %s", Object.keys(toNotify).join('\n')),
+        priority: push_notification.Priority.HIGH
+      }));
     }
 
   }
@@ -268,7 +273,7 @@ ruleEngineModule.defineRule({ruleClass: ActivateSiren.prototype, depends: ['Arme
 
 //---------------------------------------------------------------------------------------------------------------------
 class SensorHistory extends ruleEngineModule.Rule {
-  prevDetected: {[key:string]: boolean} = {};
+  prevDetected:{[key:string]: boolean} = {};
 
   run():void {
     var now = new Date();

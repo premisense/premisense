@@ -200,7 +200,9 @@ export class ArmedState extends Group {
 
   }
 
-  updateLogEvent():void {
+  updateLogEvent():Q.Promise<boolean> {
+    var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
+
     var persist:boolean = false;
     if (_.isNull(ArmedState.logEvent)) {
       persist = true;
@@ -208,7 +210,7 @@ export class ArmedState extends Group {
         type: "arming",
         message: "armed",
         severity: event_log.Severity.INFO,
-        user: null,
+        user: null, //TODO how to get the current user (zones?)
         data: {}
       });
     }
@@ -246,8 +248,14 @@ export class ArmedState extends Group {
     }
 
     if (persist) {
-      service.Service.instance.eventLog.log(ArmedState.logEvent);
+      service.Service.instance.eventLog.log(ArmedState.logEvent)
+      .then(() => {
+          deferred.resolve(true);
+        });
+    } else {
+      deferred.resolve(true);
     }
+    return deferred.promise;
   }
 }
 

@@ -46,16 +46,16 @@ export class SensorHistory {
 
           _.forEach(slots, (slot) => {
             if (parseInt(slot) !== currentSlot) {
-              var count = itemHistory[slot];
+              var count = itemHistory.history[slot];
               if (!_.isUndefined(count) && count > 0) {
                 this.database.run(sql, id, slot, count, (err) => {
-                  if (itemHistory[slot]) {
-                    itemHistory[slot] -= count;
-                    if (itemHistory[slot] == 0) {
-                      delete itemHistory[slot];
+                  if (itemHistory.history[slot]) {
+                    itemHistory.history[slot] -= count;
+                    if (itemHistory.history[slot] == 0) {
+                      delete itemHistory.history[slot];
 
                       var tmp = this.history[id];
-                      if (Object.keys(tmp).length == 0)
+                      if (Object.keys(tmp.history).length == 0)
                         delete this.history[id];
                     }
                   }
@@ -117,7 +117,7 @@ export class SensorHistory {
       this.history[id] = itemHistory;
     }
 
-    if (!itemHistory[slot])
+    if (!itemHistory.history[slot])
       itemHistory.history[slot] = 1;
     else
       itemHistory.history[slot] += 1;
@@ -129,7 +129,7 @@ export class SensorHistory {
 
     var itemHistory:ItemHistory = new ItemHistory();
 
-    var sql:string = "select * from sensor_history where sensorId = ?"
+    var sql:string = "select * from sensor_history where sensorId = ?";
 //  public each(sql: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void): Database;
 
     self.database.each(sql, id, (err, row) => {

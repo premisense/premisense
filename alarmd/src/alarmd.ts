@@ -28,6 +28,7 @@ import sensor_history = require('./sensor_history')
 import Hub = hubModule.Hub;
 import MqttHub = hubModule.MqttHub;
 
+
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
 
@@ -454,20 +455,63 @@ itemModule.transaction(() => {
 //TODO load more rules from plugins directory
 
 //--------------------------------------------------------------------------
-
-//TODO load pushNotification
-//TODO load siren
-
-//TODO load siren options from config
+//      load push_notification
+//--------------------------------------------------------------------------
 var pushNotification:push_notification.PushNotification = null;
-var siren:itemModule.Siren = new itemModule.Siren({
-  id: 'Siren',
-  maxActiveTime: 10*60,
-  mqttClient: mqttClient,
-  topic: "/command/2",
-  activateCommand: "0105020b000000138801",
-  deactivateCommand: "0104020b01"
-});
+
+logger.debug(util.format("loading push_notification settings"));
+if (configJson['push_notification']) {
+  var pushNotificationSection = configJson['push_notification'];
+  var pushNotificationType = pushNotificationSection['type'];
+  if (pushNotificationType !== '') {
+    if (pushNotificationType == 'pushover') {
+      var pushNotificationOptionsSection = pushNotificationSection['options'];
+      var pushNotificationOptions = pushNotificationSection['options'] || {};
+      if (U.isNullOrUndefined(pushNotificationOptions['defaultAppKey'])) {
+        configError(util.format("defaultAppKey is required for pushover options section"));
+      }
+      if (U.isNullOrUndefined(pushNotificationOptions['defaultUserKey'])) {
+        configError(util.format("defaultUserKey is required for pushover options section"));
+      }
+      if (U.isNullOrUndefined(pushNotificationOptions['defaultTitle'])) {
+        pushNotificationOptions.defaultTitle = 'alarmd'
+      }
+      if (U.isNullOrUndefined(pushNotificationOptions['defaultPriority'])) {
+        pushNotificationOptions.defaultPriority = push_notification.Priority.NORMAL;
+      }
+
+      if (U.isNullOrUndefined(pushNotificationOptions['prioritySoundMap'])) {
+        pushNotificationOptions.prioritySoundMap = {};
+        push_notification[push_notification.Priority.CRITICAL] = 'siren';
+      }
+
+      pushNotification = new push_notification.Pushover(pushNotificationOptions);
+    } else {
+      configError(util.format("unknown push_notification type: %s", pushNotificationType));
+    }
+  }
+}
+//--------------------------------------------------------------------------
+//      load siren
+//--------------------------------------------------------------------------
+var siren:itemModule.Siren = null;
+
+logger.debug(util.format("loading siren settings"));
+if (!configJson['siren']) {
+  configError(util.format("missing siren section"));
+} else {
+  var sirenSection = configJson['siren'];
+  var sirenOptions:itemModule.SirenOptions = {
+    id: 'Siren',
+    maxActiveTime: !U.isNullOrUndefined(sirenSection['maxActiveTime']) ? sirenSection['maxActiveTime'] : 10*60,
+    mqttClient: mqttClient,
+    topic: !U.isNullOrUndefined(sirenSection['topic']) ? sirenSection['topic'] : "",
+    activateCommand: !U.isNullOrUndefined(sirenSection['activateCommand']) ? sirenSection['activateCommand'] : "",
+    deactivateCommand: !U.isNullOrUndefined(sirenSection['deactivateCommand']) ? sirenSection['deactivateCommand'] : ""
+  };
+  siren = new itemModule.Siren(sirenOptions);
+}
+//--------------------------------------------------------------------------
 
 var database = new sqlite.Database("database.dat", (err) => {
   if (err) {

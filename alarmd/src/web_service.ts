@@ -15,6 +15,7 @@ import itemModule = require('./item')
 import auth = require('./auth')
 import service = require('./service')
 import sensor_history = require('./sensor_history')
+import event_log = require('./event_log')
 import arming = require('./arming');
 
 import logging = require('./logging');
@@ -52,6 +53,7 @@ export class WebService {
       .post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor)
       .post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming)
       .get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory)
+      .get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog)
 
     ;
   }
@@ -270,6 +272,25 @@ export class WebService {
       }, (err) => {
         res.status(500).send("failed to process query. event logged.");
       });
+
+  }
+
+  static getEventLog(req:express.Request, res:express.Response):void {
+
+    service.Service.instance.armedStates.active.updateLogEvent()
+    .then (() => {
+      service.Service.instance.eventLog.query()
+        .then((events:event_log.Event[]) => {
+          var eventsJsons = [];
+          _.forEach(events, (e) => {
+            eventsJsons.push(e.toJson());
+          }, this);
+          var response = JSON.stringify(eventsJsons);
+          res.status(200).send(response);
+        }, (err) => {
+          res.status(500).send("failed to process query. event logged.");
+        });
+    });
 
   }
 

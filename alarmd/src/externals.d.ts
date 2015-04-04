@@ -5,6 +5,7 @@
 ///<reference path="../typings/express/express.d.ts"/>
 ///<reference path="../typings/compression/compression.d.ts"/>
 ///<reference path="../typings/request/request.d.ts"/>
+///<reference path="../typings/form-data/form-data.d.ts"/>
 ///<reference path="../typings/websocket/websocket.d.ts"/>
 ///<reference path="../typings/sqlite3/sqlite3.d.ts"/>
 ///<reference path="../typings/uuid/UUID.d.ts"/>
@@ -26,11 +27,6 @@ declare module "mqtt" {
   function connect(url: string, options: any) : Client;
 }
 
-declare module "winston-syslog" {
-  export class Syslog{
-    constructor(options: any);
-  }
-}
 
 //declare module "sf" {
 //
