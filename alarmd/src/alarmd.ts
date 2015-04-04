@@ -11,6 +11,7 @@ import winston = require('winston');
 import os = require('os')
 import Q = require('q')
 import express = require('express')
+import sqlite = require('sqlite3')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -22,6 +23,7 @@ import web_service = require('./web_service')
 import push_notification = require("./push_notification")
 import ruleEngineModule = require('./rule_engine')
 import event_log = require('./event_log')
+import sensor_history = require('./sensor_history')
 
 import Hub = hubModule.Hub;
 import MqttHub = hubModule.MqttHub;
@@ -467,6 +469,13 @@ var siren:itemModule.Siren = new itemModule.Siren({
   deactivateCommand: "0104020b01"
 });
 
+var database = new sqlite.Database("database.dat", (err) => {
+  if (err) {
+    logger.error("failed to initialize event_log database. error:", err);
+    process.exit(1);
+  }
+});
+
 //--------------------------------------------------------------------------
 //      initialize the service
 //--------------------------------------------------------------------------
@@ -479,7 +488,8 @@ var serviceOptions:serviceModule.ServiceOptions = {
   pushNotification: pushNotification,
   hubs: hubs,
   ruleEngine: ruleEngine,
-  eventLog: new event_log.EventLog()
+  eventLog: new event_log.EventLog(database),
+  sensorHistory: new sensor_history.SensorHistory(database)
 };
 
 var service:serviceModule.Service;

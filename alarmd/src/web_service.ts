@@ -14,6 +14,7 @@ import U = require('./u')
 import itemModule = require('./item')
 import auth = require('./auth')
 import service = require('./service')
+import sensor_history = require('./sensor_history')
 import arming = require('./arming');
 
 import logging = require('./logging');
@@ -50,6 +51,7 @@ export class WebService {
       .post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState)
       .post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor)
       .post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming)
+      .get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory)
 
     ;
   }
@@ -247,6 +249,30 @@ export class WebService {
     return deferred.promise;
   }
 
+  static getSensorHistory(req:express.Request, res:express.Response):void {
+    var itemId = req.query.item;
+    if (U.isNullOrUndefined(itemId)) {
+      res.status(400).send("expecting item parameter");
+      return;
+    }
+
+    var item:itemModule.Item = service.Service.instance.items.all.at(itemId);
+
+    if (U.isNullOrUndefined(item)) {
+      res.status(400).send("no such item");
+      return;
+    }
+
+    service.Service.instance.sensorHistory.query(itemId)
+    .then((itemHistory) => {
+        var response = JSON.stringify(itemHistory.history);
+        res.status(200).send(response);
+      }, (err) => {
+        res.status(500).send("failed to process query. event logged.");
+      });
+
+  }
+
   static getEvents(req:express.Request, res:express.Response):void {
     var maxSizeString = req.query.maxSize;
     var sinceString = req.query.since;
@@ -255,7 +281,7 @@ export class WebService {
     try {
       since = itemModule.SyncPoint.parse(sinceString);
     } catch (e) {
-      res.send(400, "invalid since format");
+      res.status(400).send("invalid since format");
       return;
     }
 
@@ -264,7 +290,7 @@ export class WebService {
     try {
       maxSize = (U.isNullOrUndefined(maxSizeString)) ? 1 : parseInt(maxSizeString);
     } catch (e) {
-      res.send(400, "invalid maxSize format");
+      res.status(400).send("invalid maxSize format");
       return;
     }
 
@@ -429,12 +455,12 @@ export class WebService {
 
   static postCancelArming(req:express.Request, res:express.Response):void {
     if (service.Service.instance.armedStates.prev == null) {
-      res.send(400).send("no prev armed state");
+      res.status(400).send("no prev armed state");
       return;
     }
 
     if (service.Service.instance.armedStates.active.timeLeft == 0) {
-      res.send(400).send("already armed");
+      res.status(400).send("already armed");
       return;
     }
 

@@ -93,10 +93,11 @@ export class EventLog extends itemModule.Item {
   modified:number = 0;
   database:sqlite.Database;
 
-  constructor() {
+  constructor(database:sqlite.Database) {
     super({
       id: "EventLog"
     });
+    this.database = database;
   }
 
   toJson():any {
@@ -112,28 +113,21 @@ export class EventLog extends itemModule.Item {
 
     var self = this;
 
-    this.database = new sqlite.Database("event_log.dat", (err) => {
+    var sql:string = "CREATE TABLE IF NOT EXISTS event_log(\n"
+      + "eventTime numeric primary key,\n"
+      + "eventType text,\n"
+      + "eventMessage   text,\n"
+      + "eventSeverity  integer,\n"
+      + "eventUser      text,\n"
+      + "eventData      text\n"
+      + ")";
+
+    self.database.run(sql, (err) => {
       if (err) {
-        logger.error("failed to initialize event_log database. error:", err);
+        logger.error("failed to create/open event_log database. error:", err);
         deferred.resolve(false);
       } else {
-        var sql:string = "CREATE TABLE IF NOT EXISTS event_log(\n"
-          + "eventTime numeric primary key,\n"
-          + "eventType text,\n"
-          + "eventMessage   text,\n"
-          + "eventSeverity  integer,\n"
-          + "eventUser      text,\n"
-          + "eventData      text\n"
-          + ")";
-
-        self.database.run(sql, (err) => {
-          if (err) {
-            logger.error("failed to create/open event_log database. error:", err);
-            deferred.resolve(false);
-          } else {
-            deferred.resolve(true);
-          }
-        });
+        deferred.resolve(true);
       }
     });
 
@@ -145,8 +139,9 @@ export class EventLog extends itemModule.Item {
       + "(eventTime, eventType, eventMessage, eventSeverity, eventUser, eventData)\n"
       + "values(?, ?, ?, ?, ?, ?)";
 
+    var dataStr = JSON.stringify(event.data);
     var self = this;
-    this.database.run(sql, event.time, event.type, event.message, event.severity, event.user, event.data, (err)=> {
+    this.database.run(sql, Event.getUniqueTime(event.time), event.type, event.message, event.severity, event.user,dataStr, (err)=> {
       if (err) {
         logger.error("failed to insert event_log record to database. error:", err);
       } else {

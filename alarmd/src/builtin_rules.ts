@@ -268,9 +268,22 @@ ruleEngineModule.defineRule({ruleClass: ActivateSiren.prototype, depends: ['Arme
 
 //---------------------------------------------------------------------------------------------------------------------
 class SensorHistory extends ruleEngineModule.Rule {
+  prevDetected: {[key:string]: boolean} = {};
 
   run():void {
-    logger.info("here");
+    var now = new Date();
+    var slot = Math.floor(now.getTime() / 1000 / 300) * 300;
+
+    var detected = _.filter(serviceModule.Service.instance.items.all.allItems, (item) => item instanceof itemModule.Sensor && item.isDetected());
+    var oldPrevDetected = this.prevDetected;
+    this.prevDetected = {};
+
+    _.forEach(detected, (item) => {
+      if (!oldPrevDetected[item.id]) {
+        this.prevDetected[item.id] = true;
+        serviceModule.Service.instance.sensorHistory.add(slot, item.id);
+      }
+    }, this);
   }
 }
 ruleEngineModule.defineRule({ruleClass: SensorHistory.prototype, depends: ['ArmedStates']});

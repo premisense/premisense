@@ -14,6 +14,7 @@ import auth = require('./auth')
 import web_service = require('./web_service')
 import push_notification = require('./push_notification')
 import event_log = require('./event_log')
+import sensor_history = require('./sensor_history')
 import rule_engine = require('./rule_engine')
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -85,6 +86,7 @@ export class ServiceOptions {
   hubs:Hub[];
   ruleEngine:RuleEngine;
   eventLog:event_log.EventLog;
+  sensorHistory:sensor_history.SensorHistory;
 }
 
 export class Service {
@@ -102,11 +104,11 @@ export class Service {
   private _users:auth.Users;
   private _ruleEngine:RuleEngine;
   private _eventLog:event_log.EventLog;
+  private _sensorHistory:sensor_history.SensorHistory;
 
   private _pushNotification:PushNotification;
   private  webService:WebService;
   private _events:itemModule.ItemEvents = itemModule.ItemEvents.instance;
-  //TODO final EventLog eventLog = new EventLog();
 
   get pushNotification():PushNotification {
     return this._pushNotification;
@@ -140,6 +142,10 @@ export class Service {
     return this._eventLog;
   }
 
+  get sensorHistory():sensor_history.SensorHistory {
+    return this._sensorHistory;
+  }
+
   constructor(o:ServiceOptions) {
     assert(Service._instance == null);
     Service._instance = this;
@@ -154,6 +160,7 @@ export class Service {
     this._ruleEngine = o.ruleEngine;
     this._pushNotification = o.pushNotification;
     this._eventLog = o.eventLog;
+    this._sensorHistory = o.sensorHistory;
   }
 
   start():Q.Promise<boolean> {
@@ -167,44 +174,52 @@ export class Service {
           deferred.resolve(false);
         } else {
 
-          logger.info("activating armedState:%s", this.armedStates.states[0].name);
-          this.armedStates.states[0].activate()
-            .then(() => {
+          this.sensorHistory.start()
+            .then((result) => {
+              if (!result) {
+                deferred.resolve(false);
+              } else {
+                logger.info("activating armedState:%s", this.armedStates.states[0].name);
+                this.armedStates.states[0].activate()
+                  .then(() => {
 
-              var startHubs:Q.Promise<boolean>[] = [];
+                    var startHubs:Q.Promise<boolean>[] = [];
 
-              logger.debug("starting hubs...");
+                    logger.debug("starting hubs...");
 
-              _.forEach(self._hubs, (hub) => {
-                startHubs.push(hub.start());
-              }, self);
+                    _.forEach(self._hubs, (hub) => {
+                      startHubs.push(hub.start());
+                    }, self);
 
-              Q.allSettled(startHubs)
-                .then(() => {
+                    Q.allSettled(startHubs)
+                      .then(() => {
 
-                  logger.debug("starting rule engine...");
-                  self._ruleEngine.start()
-                    .then(() => {
+                        logger.debug("starting rule engine...");
+                        self._ruleEngine.start()
+                          .then(() => {
 
-                      logger.debug("starting web service...");
+                            logger.debug("starting web service...");
 
-                      self.webService.start()
-                        .then(() => {
+                            self.webService.start()
+                              .then(() => {
 
-                          // first run
-                          self._ruleEngine.run();
+                                // first run
+                                self._ruleEngine.run();
 
-                          this.eventLog.log(new event_log.Event({
-                            type: 'service',
-                            message: 'started',
-                            user: null,
-                            severity: event_log.Severity.INFO
-                          }));
+                                this.eventLog.log(new event_log.Event({
+                                  type: 'service',
+                                  message: 'started',
+                                  user: null,
+                                  severity: event_log.Severity.INFO
+                                }));
 
-                          deferred.resolve(true);
-                        });
-                    });
-                });
+                                deferred.resolve(true);
+                              });
+                          });
+                      });
+                  });
+
+              }
             });
         }
       });
