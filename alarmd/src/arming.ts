@@ -10,6 +10,7 @@ import U = require('./u')
 import itemModule = require('./item')
 import service = require('./service')
 import event_log = require('./event_log');
+import domain_info = require('./domain_info')
 
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -203,6 +204,8 @@ export class ArmedState extends Group {
   updateLogEvent():Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
 
+    var userName = domain_info.DomainInfo.active.user.name;
+
     var persist:boolean = false;
     if (_.isNull(ArmedState.logEvent)) {
       persist = true;
@@ -210,7 +213,7 @@ export class ArmedState extends Group {
         type: "arming",
         message: "armed",
         severity: event_log.Severity.INFO,
-        user: null, //TODO how to get the current user (zones?)
+        user: userName,
         data: {}
       });
     }

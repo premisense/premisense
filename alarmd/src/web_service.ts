@@ -9,14 +9,17 @@ import assert = require('assert')
 import _ = require('lodash')
 import Q = require('q')
 import compression = require('compression')
+import domain = require('domain')
 
 import U = require('./u')
 import itemModule = require('./item')
+import domain_info = require('./domain_info')
 import auth = require('./auth')
 import service = require('./service')
 import sensor_history = require('./sensor_history')
 import event_log = require('./event_log')
-import arming = require('./arming');
+import arming = require('./arming')
+
 
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -44,6 +47,7 @@ export class WebService {
 
 
     this.app
+      .use(WebService.domainWrapper)
       .use(WebService.bodyReader)
       .use(compression())
       .get('/', WebService.home)
@@ -56,6 +60,30 @@ export class WebService {
       .get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog)
 
     ;
+  }
+
+  static domainWrapper(req:express.Request, res:express.Response, next:Function):void {
+
+    var self = service.Service.instance.webService;
+
+    var d = domain.create();
+    d.on('error', (err) => {
+      logger.error("domain error: %s. stack:%s", err, err.stack);
+    });
+
+    var domainInfo = new domain_info.DomainInfo();
+
+    var dom:any = d;
+    dom.domainInfo = d;
+
+
+    d.add(req);
+    d.add(res);
+
+    d.run(() => {
+      next ();
+      //self.app.router(req, res, next);
+    });
   }
 
   static parseAuth(auth:string):any {
@@ -112,14 +140,16 @@ export class WebService {
       })) == null)
       return;
 
-    req.user = user;
+    // we expect the first filter to assign a new domain for this request
+    assert (domain_info.DomainInfo.active != domain_info.DomainInfo.global);
+    domain_info.DomainInfo.active.user = user;
 
     next();
   }
 
   static checkApi(req:express.Request, reject:(code, description) => void):boolean {
-    assert(req.user != null && req.user instanceof auth.User);
-    var user:auth.User = <auth.User> req.user;
+    assert (domain_info.DomainInfo.active != domain_info.DomainInfo.global);
+    var user = domain_info.DomainInfo.active.user;
 
     if (!user.accessRestApi) {
       reject(401, "authorization required");
@@ -315,12 +345,14 @@ export class WebService {
       return;
     }
 
+    var user = domain_info.DomainInfo.active.user;
+
     var fields:Fields = {
       device_id: _.result(req.query, 'device_id', ''),
       protocol: req.protocol,
       host: req.headers['host'],
-      username: (<auth.User>req.user).name,
-      password: (<auth.User>req.user).password
+      username: user.name,
+      password: user.password
     };
 
     res.setHeader('Content-Type', 'text/plain');
@@ -427,7 +459,7 @@ export class WebService {
   static checkPinCode(req:express.Request, res:express.Response):boolean {
     var pinCode = req.headers['x-pincode'];
 
-    var user:auth.User = <auth.User>req.user;
+    var user = domain_info.DomainInfo.active.user;
 
     if (user.pinCode == null && _.isUndefined(pinCode))
       return true;

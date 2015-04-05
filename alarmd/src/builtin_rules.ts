@@ -17,11 +17,7 @@ var logger = new logging.Logger(__filename);
 
 
 //---------------------------------------------------------------------------------------------------------------------
-//TODO remove me after debugging
-class Dummy extends ruleEngineModule.Rule {
-}
-//---------------------------------------------------------------------------------------------------------------------
-class Arm extends Dummy {
+class Arm extends ruleEngineModule.Rule {
   prev:arming.ArmedState = serviceModule.Service.instance.armedStates.active;
   armedDetected:itemModule.Item[];
 
@@ -166,7 +162,11 @@ class NotifyMonitor extends ruleEngineModule.Rule {
     var detectedString = detected.join(',');
     if (detectedString != this.prevDetectedString) {
       this.prevDetectedString = detectedString;
-      //TODO fixme serviceModule.Service.instance.pushNotification.send(new Message ("Monitor Sensors Detected", detectedString, priority: Priority.HIGH));
+      serviceModule.Service.instance.pushNotification.send(new push_notification.Message({
+        title: "Monitor Sensors Detected",
+        body: detectedString,
+        priority: push_notification.Priority.HIGH
+      }));
     }
   }
 }

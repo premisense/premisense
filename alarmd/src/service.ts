@@ -5,6 +5,7 @@ import through = require('through')
 import Q = require('q')
 import assert = require('assert')
 import _ = require('lodash')
+import domain = require('domain')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -16,6 +17,7 @@ import push_notification = require('./push_notification')
 import event_log = require('./event_log')
 import sensor_history = require('./sensor_history')
 import rule_engine = require('./rule_engine')
+import domain_info = require('./domain_info')
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
 
@@ -107,7 +109,7 @@ export class Service {
   private _sensorHistory:sensor_history.SensorHistory;
 
   private _pushNotification:PushNotification;
-  private  webService:WebService;
+  private  _webService:WebService;
   private _events:itemModule.ItemEvents = itemModule.ItemEvents.instance;
 
   get pushNotification():PushNotification {
@@ -146,6 +148,10 @@ export class Service {
     return this._sensorHistory;
   }
 
+  get webService():WebService {
+    return this._webService;
+  }
+
   constructor(o:ServiceOptions) {
     assert(Service._instance == null);
     Service._instance = this;
@@ -153,7 +159,7 @@ export class Service {
     this._items = o.items;
     this._hubs = o.hubs;
     this._armedStates = o.armedStates;
-    this.webService = o.webService;
+    this._webService = o.webService;
     this._users = o.users;
     this._siren = o.siren;
     this._armedStates.addParent(o.items.all);
@@ -166,6 +172,13 @@ export class Service {
   start():Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
 
+    domain_info.DomainInfo.global.user = this.users.getAdmin();
+    this._start(deferred);
+
+    return deferred.promise;
+  }
+
+  _start(deferred:Q.Deferred<boolean>):void {
     var self = this;
 
     this.eventLog.start()
@@ -200,7 +213,7 @@ export class Service {
 
                             logger.debug("starting web service...");
 
-                            self.webService.start()
+                            self._webService.start()
                               .then(() => {
 
                                 // first run
@@ -223,7 +236,5 @@ export class Service {
             });
         }
       });
-
-    return deferred.promise;
   }
 }
