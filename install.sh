@@ -23,7 +23,6 @@ function die() {
 which socat >/dev/null 2>/dev/null || die "socat is not installed. run apt-get install socat"
 which supervisord >/dev/null 2>/dev/null || die "supervisord is not installed. run apt-get install supervisor"
 
-exit;
 (
 	echo "building"
 	./build.sh

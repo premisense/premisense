@@ -33,10 +33,10 @@ then
 	die "expecting node v0.11.12 or higher. follow TBD:URL on how to upgrade/install"
 fi
 
-which npm 2>/dev/null >/dev/null || die "could not find npm or it is not installed. follow TBD:URL on how to upgrade/install"
+which npm 2>/dev/null >/dev/null || die "could not find npm or it is not installed. to upgrade to the latest, run: 'npm update -g npm'"
 if ! vercmp "$(npm -v)" ge "2.6.0"
 then
-	die "expecting npm 2.6.0 or higher. follow TBD:URL on how to upgrade/install"
+	die "expecting npm 2.6.0 or higher. to upgrade to the latest, run: 'npm update -g npm'"
 fi
 
 (

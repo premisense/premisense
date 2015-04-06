@@ -2,17 +2,25 @@
 set -e
 DIR=$(cd $(dirname $0); pwd)
 
+SENSORD_DIR=$(cd $DIR/..; pwd)
 cd $DIR
+
+NODE_DIR=$(which node)
 
 cat <<EOF > /etc/supervisor/conf.d/sensord.conf
 [program:sensord]
-command=node build/sensord.js
+command=$NODE_DIR/node build/sensord.js
 process_name=%(program_name)s
 numprocs=1
-directory=$DIR
+directory=$SENSORD_DIR
 autostart=true
 autorestart=unexpected
 startsecs=10
 exitcodes=10
-environment=PATH=$(dirname $(which node)):%(ENV_PATH)s
+stdout_logfile=/sensord.log
+stdout_logfile_maxbytes=1MB
+#stdout_logfile_backups=10
+stderr_logfile=/sensord.log
+stderr_logfile_maxbytes=1MB
+#stderr_logfile_backups
 EOF
