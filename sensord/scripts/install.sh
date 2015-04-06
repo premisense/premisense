@@ -5,11 +5,11 @@ DIR=$(cd $(dirname $0); pwd)
 SENSORD_DIR=$(cd $DIR/..; pwd)
 cd $DIR
 
-NODE_DIR=$(which node)
+NODE_PATH=$(which node)
 
 cat <<EOF > /etc/supervisor/conf.d/sensord.conf
 [program:sensord]
-command=$NODE_DIR/node build/sensord.js
+command=$NODE_PATH build/sensord.js
 process_name=%(program_name)s
 numprocs=1
 directory=$SENSORD_DIR
