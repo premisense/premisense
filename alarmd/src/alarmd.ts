@@ -59,7 +59,7 @@ winston.addColors({
 var packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 var args:{[key:string]: any } = yargs
-    .usage("Usage: $0 -f config [options]")
+    .usage("Usage: $0 -c config [options]")
     .help('h')
     .alias('h', 'help')
     .option('v', {
