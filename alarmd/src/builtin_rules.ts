@@ -159,7 +159,7 @@ class NotifyMonitor extends ruleEngineModule.Rule {
 
     if (detected.length == 0)
       return;
-    var detectedString = detected.join(',');
+    var detectedString = detected.map((item) => item.id).join(',');
     if (detectedString != this.prevDetectedString) {
       this.prevDetectedString = detectedString;
       serviceModule.Service.instance.pushNotification.send(new push_notification.Message({
