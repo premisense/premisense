@@ -48,7 +48,4 @@ fi
 	echo "building alarmd"
 	./alarmd/build.sh
 	
-	echo "building alarmt"
-	./alarmt/build.sh
-
 ) | tee build.log
