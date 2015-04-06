@@ -27,6 +27,8 @@ function vercmp() {
 	return 0
 }
 
+which g++ 2>/dev/null >/dev/null || die "could not find g++ or it is not installed. run: 'apt-get install g++'"
+
 which node 2>/dev/null >/dev/null || die "could not find node or it is not installed. follow TBD:URL on how to upgrade/install"
 if ! vercmp "$(node -v)" ge "0.11.12"
 then
