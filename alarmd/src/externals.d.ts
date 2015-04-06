@@ -7,13 +7,12 @@
 ///<reference path="../typings/request/request.d.ts"/>
 ///<reference path="../typings/form-data/form-data.d.ts"/>
 ///<reference path="../typings/websocket/websocket.d.ts"/>
-///<reference path="../typings/sqlite3/sqlite3.d.ts"/>
 ///<reference path="../typings/uuid/UUID.d.ts"/>
 ///<reference path="../typings/lodash/lodash.d.ts"/>
 ///<reference path="../typings/mocha/mocha.d.ts"/>
 ///<reference path="../typings/yargs/yargs.d.ts"/>
 ///<reference path="../typings/moment/moment.d.ts"/>
-///<reference path="../typings/sqlite3/sqlite3.d.ts"/>
+///<reference path="../typings/nedb/nedb.d.ts"/>
 
 declare module "mqtt" {
   import eventsModule = require('events')

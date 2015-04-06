@@ -8,7 +8,7 @@
   "dependencies": {
     "through": "*",
     "mqtt": "*",
-    "sqlite3" : "*",
+    "nedb" : "*",
     "q": "*",
     "moment": "*",
     "compression": "*",

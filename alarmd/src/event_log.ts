@@ -4,7 +4,7 @@ import eventsModule = require('events')
 import through = require('through')
 import assert = require('assert')
 import _ = require('lodash')
-import sqlite = require('sqlite3')
+import NeDB = require('nedb')
 import Q = require('q')
 
 import U = require('./u')
@@ -13,6 +13,7 @@ import itemModule = require('./item');
 import serviceModule = require('./service');
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
+
 
 export enum Severity {
   INFO = 0,
@@ -103,13 +104,13 @@ export class Event {
 
 export class EventLog extends itemModule.Item {
   modified:number = 0;
-  database:sqlite.Database;
+  database:NeDB;
 
-  constructor(database:sqlite.Database) {
+  constructor(filename:string) {
     super({
       id: "EventLog"
     });
-    this.database = database;
+    this.database = new NeDB(filename);
   }
 
   toJson():any {
@@ -125,20 +126,13 @@ export class EventLog extends itemModule.Item {
 
     var self = this;
 
-    var sql:string = "CREATE TABLE IF NOT EXISTS event_log(\n"
-      + "eventTime numeric primary key,\n"
-      + "eventType text,\n"
-      + "eventMessage   text,\n"
-      + "eventSeverity  integer,\n"
-      + "eventUser      text,\n"
-      + "eventData      text\n"
-      + ")";
-
-    self.database.run(sql, (err) => {
+    self.database.loadDatabase((err) => {
       if (err) {
         logger.error("failed to create/open event_log database. error:", err);
         deferred.resolve(false);
       } else {
+
+        self.database.persistence.setAutocompactionInterval(24 * 60 * 60 * 1000);
         deferred.resolve(true);
       }
     });
@@ -149,13 +143,18 @@ export class EventLog extends itemModule.Item {
   log(event:Event):Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
 
-    var sql = "insert into event_log\n"
-      + "(eventTime, eventType, eventMessage, eventSeverity, eventUser, eventData)\n"
-      + "values(?, ?, ?, ?, ?, ?)";
-
-    var dataStr = JSON.stringify(event.data);
     var self = this;
-    this.database.run(sql, Event.getUniqueTime(event.time), event.type, event.message, event.severity, event.user, dataStr, (err)=> {
+
+    var doc = {
+      time: Event.getUniqueTime(event.time),
+      type: event.type,
+      message: event.message,
+      severity: event.severity,
+      user: event.user,
+      data: event.data
+    };
+
+    self.database.insert(doc, (err) => {
       if (err) {
         logger.error("failed to insert event_log record to database. error:", err);
         deferred.reject(false);
@@ -166,6 +165,7 @@ export class EventLog extends itemModule.Item {
         deferred.resolve(true);
       }
     });
+
     return deferred.promise;
   }
 
@@ -175,33 +175,23 @@ export class EventLog extends itemModule.Item {
 
     var events:Event[] = [];
 
-    var sql:string = "select * from event_log";
-//  public each(sql: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void): Database;
-
-    self.database.each(sql, (err, row) => {
+    self.database.find({}, (err, docs) => {
       if (err) {
         logger.error("failed to retrieve record from event_log. error:", err);
       } else {
-        var data = null;
-        if (!U.isNullOrUndefined(row.eventData))
-          data = JSON.parse(row.eventData);
-        var event:Event = new Event({
-          type: row.eventType,
-          message: row.eventMessage,
-          severity: row.eventSeverity,
-          user: row.eventUser,
-          time: row.eventTime,
-          data: data
+        _.forEach(docs, (doc:any) => {
+          var event:Event = new Event({
+            type: doc.type,
+            message: doc.message,
+            severity: doc.severity,
+            user: doc.user,
+            time: doc.time,
+            data: doc.data
+          });
+          events.push(event);
         });
-        events.push(event);
       }
-    }, (err, count) => {
-      if (err) {
-        logger.error("failed to retrieve records from event_log. error:", err);
-        deferred.reject("failed");
-      } else {
-        deferred.resolve(events);
-      }
+      deferred.resolve(events);
     });
 
     return deferred.promise;

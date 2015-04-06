@@ -4,7 +4,7 @@ import eventsModule = require('events')
 import through = require('through')
 import assert = require('assert')
 import _ = require('lodash')
-import sqlite = require('sqlite3')
+import NeDB = require('nedb')
 import Q = require('q')
 
 import U = require('./u')
@@ -19,11 +19,11 @@ export class ItemHistory {
 }
 
 export class SensorHistory {
-  database:sqlite.Database;
   history:{[key:string]: ItemHistory} = {};
+  database:NeDB;
 
-  constructor(database:sqlite.Database) {
-    this.database = database;
+  constructor(filename:string) {
+    this.database = new NeDB(filename);
   }
 
   private persist():void {
@@ -37,38 +37,41 @@ export class SensorHistory {
     // clone keys to avoid iteration while modifying
     var items = _.clone(Object.keys(this.history));
 
-    this.database.serialize(() => {
-      _.forEach(items, (id) => {
-        var itemHistory:ItemHistory = this.history[id];
-        if (itemHistory) {
-          // clone keys to avoid iteration while modifying
-          var slots:string[] = _.clone(Object.keys(itemHistory.history));
+    _.forEach(items, (id) => {
+      var itemHistory:ItemHistory = this.history[id];
+      if (itemHistory) {
+        // clone keys to avoid iteration while modifying
+        var slots:string[] = _.clone(Object.keys(itemHistory.history));
 
-          _.forEach(slots, (slot) => {
-            if (parseInt(slot) !== currentSlot) {
-              var count = itemHistory.history[slot];
-              if (!_.isUndefined(count) && count > 0) {
-                this.database.run(sql, id, slot, count, (err) => {
-                  if (itemHistory.history[slot]) {
-                    itemHistory.history[slot] -= count;
-                    if (itemHistory.history[slot] == 0) {
-                      delete itemHistory.history[slot];
+        _.forEach(slots, (slot) => {
+          if (parseInt(slot) !== currentSlot) {
+            var count = itemHistory.history[slot];
+            if (!_.isUndefined(count) && count > 0) {
+              var doc:any = {
+                id: id,
+                time: slot,
+                count: count
+              };
+              this.database.insert(doc, (err) => {
+                if (itemHistory.history[slot]) {
+                  itemHistory.history[slot] -= count;
+                  if (itemHistory.history[slot] == 0) {
+                    delete itemHistory.history[slot];
 
-                      var tmp = this.history[id];
-                      if (Object.keys(tmp.history).length == 0)
-                        delete this.history[id];
-                    }
+                    var tmp = this.history[id];
+                    if (Object.keys(tmp.history).length == 0)
+                      delete this.history[id];
                   }
-                  if (err) {
-                    logger.error("failed to insert record into sensor_history database. error:", err);
-                  }
-                });
-              }
+                }
+                if (err) {
+                  logger.error("failed to insert record into sensor_history database. error:", err);
+                }
+              });
             }
-          }, self);
-        }
-      }, self);
-    });
+          }
+        }, self);
+      }
+    }, self);
   }
 
   private reschedulePersist():void {
@@ -89,18 +92,12 @@ export class SensorHistory {
 
     var self = this;
 
-    var sql:string = "CREATE TABLE IF NOT EXISTS sensor_history(\n"
-      + "sensorId text,\n"
-      + "eventTime numeric,\n"
-      + "detectCount  integer,\n"
-      + "primary key (sensorId, eventTime)\n"
-      + ")";
-
-    self.database.run(sql, (err) => {
+    self.database.loadDatabase((err) => {
       if (err) {
         logger.error("failed to create/open sensor_history database. error:", err);
         deferred.resolve(false);
       } else {
+        self.database.persistence.setAutocompactionInterval(24 * 60 * 60 * 1000);
         self.reschedulePersist();
         deferred.resolve(true);
       }
@@ -129,20 +126,15 @@ export class SensorHistory {
 
     var itemHistory:ItemHistory = new ItemHistory();
 
-    var sql:string = "select * from sensor_history where sensorId = ?";
-//  public each(sql: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void): Database;
-
-    self.database.each(sql, id, (err, row) => {
+    self.database.find({id: id}, (err, docs) => {
       if (err) {
         logger.error("failed to retrieve record from sensor_history. error:", err);
-      } else {
-        itemHistory.history[row.eventTime] = row.detectCount;
-      }
-    }, (err, count) => {
-      if (err) {
-        logger.error("failed to retrieve records from sensor_history. error:", err);
         deferred.reject("failed");
       } else {
+        _.forEach(docs, (doc:any) => {
+          itemHistory.history[doc.time] = doc.count;
+        });
+
         var pendingUpdates = this.history[id];
         if (!U.isNullOrUndefined(pendingUpdates)) {
           _.forEach(pendingUpdates.history, (v, k) => {

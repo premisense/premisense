@@ -11,7 +11,6 @@ import winston = require('winston');
 import os = require('os')
 import Q = require('q')
 import express = require('express')
-import sqlite = require('sqlite3')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -513,13 +512,6 @@ if (!configJson['siren']) {
 }
 //--------------------------------------------------------------------------
 
-var database = new sqlite.Database("database.dat", (err) => {
-  if (err) {
-    logger.error("failed to initialize event_log database. error:", err);
-    process.exit(1);
-  }
-});
-
 //--------------------------------------------------------------------------
 //      initialize the service
 //--------------------------------------------------------------------------
@@ -532,8 +524,8 @@ var serviceOptions:serviceModule.ServiceOptions = {
   pushNotification: pushNotification,
   hubs: hubs,
   ruleEngine: ruleEngine,
-  eventLog: new event_log.EventLog(database),
-  sensorHistory: new sensor_history.SensorHistory(database)
+  eventLog: new event_log.EventLog('event_log.dat'),
+  sensorHistory: new sensor_history.SensorHistory('sensor_history.dat')
 };
 
 var service:serviceModule.Service;
