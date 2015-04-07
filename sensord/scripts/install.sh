@@ -1,11 +1,19 @@
 #!/bin/bash
-set -e
-DIR=$(cd $(dirname $0); pwd)
 
+DIR=$(cd $(dirname $0); pwd)
 SENSORD_DIR=$(cd $DIR/..; pwd)
-cd $DIR
+
+. $SENSORD_DIR/../scripts/common.sh
+
 
 NODE_PATH=$(which node)
+
+(
+	cd $SENSORD_DIR
+	npm install --unsafe-perm --production
+) | tee install.log
+
+exit
 
 cat <<EOF > /etc/supervisor/conf.d/sensord.conf
 [program:sensord]

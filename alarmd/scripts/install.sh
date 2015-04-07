@@ -1,11 +1,20 @@
 #!/bin/bash
-set -e
-DIR=$(cd $(dirname $0); pwd)
 
+DIR=$(cd $(dirname $0); pwd)
 ALARMD_DIR=$(cd $DIR/..; pwd)
-cd $DIR
+
+. $ALARMD_DIR/../scripts/common.sh
+
 
 NODE_PATH=$(which node)
+
+(
+	cd $ALARMD_DIR
+	npm install --unsafe-perm --production
+) | tee install.log
+
+
+exit
 
 cat <<EOF > /etc/supervisor/conf.d/alarmd.conf
 [program:alarmd]
