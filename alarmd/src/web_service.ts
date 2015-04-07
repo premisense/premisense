@@ -62,6 +62,38 @@ export class WebService {
     ;
   }
 
+  static replaceFields(req:express.Request, res:express.Response, next:Function):void {
+
+    var authorization = req.headers["authorization"] || req.query.authorization;
+    var basicAuthUser = WebService.parseAuth(authorization);
+
+    var fields:Fields = {
+      device_id: _.result(req.query, 'device_id', ''),
+      protocol: req.protocol,
+      host: req.headers['host'],
+      username: (basicAuthUser) ? basicAuthUser.name : null,
+      password: (basicAuthUser) ? basicAuthUser.pass : null
+    };
+
+    var r:any = res;
+
+    var originalWrite = r.write;
+    var originalWriteHead = r.writeHead;
+
+    r.writeHead = (statusCode:number, reasonPhrase?:string, headers?:any):void => {
+      res.removeHeader('content-length');
+      originalWriteHead.call(r, statusCode, reasonPhrase, headers);
+    };
+
+    r.write = (data:any, encoding?:any, callback?:Function):void => {
+      var s = data.toString();
+      s = WebService._replaceFields(s, fields);
+      originalWrite.call(r, s, encoding, callback);
+    };
+    //r.write = ()
+    next();
+  }
+
   static domainWrapper(req:express.Request, res:express.Response, next:Function):void {
 
     var self = service.Service.instance.webService;
@@ -81,7 +113,7 @@ export class WebService {
     d.add(res);
 
     d.run(() => {
-      next ();
+      next();
       //self.app.router(req, res, next);
     });
   }
@@ -141,14 +173,14 @@ export class WebService {
       return;
 
     // we expect the first filter to assign a new domain for this request
-    assert (domain_info.DomainInfo.active != domain_info.DomainInfo.global);
+    assert(domain_info.DomainInfo.active != domain_info.DomainInfo.global);
     domain_info.DomainInfo.active.user = user;
 
     next();
   }
 
   static checkApi(req:express.Request, reject:(code, description) => void):boolean {
-    assert (domain_info.DomainInfo.active != domain_info.DomainInfo.global);
+    assert(domain_info.DomainInfo.active != domain_info.DomainInfo.global);
     var user = domain_info.DomainInfo.active.user;
 
     if (!user.accessRestApi) {
@@ -175,7 +207,7 @@ export class WebService {
     res.send("OK\n");
   }
 
-  static replaceFields(s:string, fields:Fields):string {
+  private static _replaceFields(s:string, fields:Fields):string {
     var result = s.replace(/\$\{([^\}]+)\}/g, (exp, s1):string => {
       var x = _.result(fields, s1, '???');
       return x;
@@ -217,7 +249,7 @@ export class WebService {
         var jsonStr = JSON.stringify(itemModule.Nop.instance.toJson()) + "\n";
         buffer += jsonStr;
         bytesWritten += buffer.length;
-        var s = WebService.replaceFields(buffer, fields);
+        var s = WebService._replaceFields(buffer, fields);
         buffer = '';
         cancelFlushTimer();
 
@@ -296,7 +328,7 @@ export class WebService {
     }
 
     service.Service.instance.sensorHistory.query(itemId)
-    .then((itemHistory) => {
+      .then((itemHistory) => {
         var response = JSON.stringify(itemHistory.history);
         res.status(200).send(response);
       }, (err) => {
@@ -308,7 +340,7 @@ export class WebService {
   static getEventLog(req:express.Request, res:express.Response):void {
 
     service.Service.instance.armedStates.active.updateLogEvent()
-    .then (() => {
+      .then(() => {
       service.Service.instance.eventLog.query()
         .then((events:event_log.Event[]) => {
           var eventsJsons = [];

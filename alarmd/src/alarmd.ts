@@ -435,7 +435,22 @@ var webService:web_service.WebService = new web_service.WebService(webServiceOpt
 if (configJson['webService']) {
   var webServiceSection = configJson['webService'];
   _.forEach(webServiceSection['serve-static'], (v, k) => {
-    webService.app.use(k, express.static(v['root'], v['options']));
+    var args:any = [];
+
+    args.push(k);
+
+    _.forEach(v['filters'], (h) => {
+      if (h === 'replaceFields') {
+        args.push(web_service.WebService.replaceFields);
+      } else {
+        configError(util.format("unknown filter: %s", h));
+      }
+    });
+
+    args.push(express.static(v['root'], v['options']));
+
+
+    webService.app.use.apply(webService.app, args);
   });
 }
 //--------------------------------------------------------------------------
@@ -502,7 +517,7 @@ if (!configJson['siren']) {
   var sirenSection = configJson['siren'];
   var sirenOptions:itemModule.SirenOptions = {
     id: 'Siren',
-    maxActiveTime: !U.isNullOrUndefined(sirenSection['maxActiveTime']) ? sirenSection['maxActiveTime'] : 10*60,
+    maxActiveTime: !U.isNullOrUndefined(sirenSection['maxActiveTime']) ? sirenSection['maxActiveTime'] : 10 * 60,
     mqttClient: mqttClient,
     topic: !U.isNullOrUndefined(sirenSection['topic']) ? sirenSection['topic'] : "",
     activateCommand: !U.isNullOrUndefined(sirenSection['activateCommand']) ? sirenSection['activateCommand'] : "",

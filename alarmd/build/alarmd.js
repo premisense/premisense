@@ -332,7 +332,18 @@ var webService = new web_service.WebService(webServiceOptions);
 if (configJson['webService']) {
     var webServiceSection = configJson['webService'];
     _.forEach(webServiceSection['serve-static'], function (v, k) {
-        webService.app.use(k, express.static(v['root'], v['options']));
+        var args = [];
+        args.push(k);
+        _.forEach(v['filters'], function (h) {
+            if (h === 'replaceFields') {
+                args.push(web_service.WebService.replaceFields);
+            }
+            else {
+                configError(util.format("unknown filter: %s", h));
+            }
+        });
+        args.push(express.static(v['root'], v['options']));
+        webService.app.use.apply(webService.app, args);
     });
 }
 //--------------------------------------------------------------------------
