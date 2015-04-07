@@ -39,8 +39,8 @@
       <file leaf-file-name="web_service.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/web_service.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.3620352">
-              <caret line="66" column="77" selection-start-line="66" selection-start-column="77" selection-end-line="66" selection-end-column="77" />
+            <state vertical-scroll-proportion="0.6555773">
+              <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -1040,12 +1040,12 @@
       <workItem from="1427986711844" duration="406000" />
       <workItem from="1427987333691" duration="43994000" />
       <workItem from="1428229865811" duration="4362000" />
-      <workItem from="1428332952153" duration="6628000" />
+      <workItem from="1428332952153" duration="6696000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="282828000" />
+    <option name="totallyTimeSpent" value="282896000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1554,8 +1554,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/web_service.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3620352">
-          <caret line="66" column="77" selection-start-line="66" selection-start-column="77" selection-end-line="66" selection-end-column="77" />
+        <state vertical-scroll-proportion="0.6555773">
+          <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
           <folding />
         </state>
       </provider>
