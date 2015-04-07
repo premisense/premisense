@@ -16,7 +16,7 @@ export class Logger {
   lowerFilename: string;
   prefix: string;
   constructor(filename: string) {
-    this.filename = path.parse(filename).name;
+    this.filename = path.basename(filename, path.extname(filename));
     this.lowerFilename = this.filename.toLowerCase();
     this.prefix = "[" + this.filename + "] ";
   }
