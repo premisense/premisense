@@ -19,12 +19,18 @@ var WebService = (function () {
         this.options = options;
         this.app.use(WebService.domainWrapper).use(WebService.bodyReader).use(compression()).get('/', WebService.home).get('/login', WebService.authFilter, WebService.apiFilter, WebService.login).get('/events', WebService.authFilter, WebService.apiFilter, WebService.getEvents).post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState).post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor).post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming).get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory).get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog);
     }
+    WebService.getProto = function (req) {
+        var fwdProto = req.header('x-forwarded-proto');
+        if (!U.isNullOrUndefined(fwdProto))
+            return fwdProto;
+        return req.protocol;
+    };
     WebService.replaceFields = function (req, res, next) {
         var authorization = req.headers["authorization"] || req.query.authorization;
         var basicAuthUser = WebService.parseAuth(authorization);
         var fields = {
             device_id: _.result(req.query, 'device_id', ''),
-            protocol: req.protocol,
+            protocol: WebService.getProto(req),
             host: req.headers['host'],
             username: (basicAuthUser) ? basicAuthUser.name : null,
             password: (basicAuthUser) ? basicAuthUser.pass : null
@@ -268,7 +274,7 @@ var WebService = (function () {
         var user = domain_info.DomainInfo.active.user;
         var fields = {
             device_id: _.result(req.query, 'device_id', ''),
-            protocol: req.protocol,
+            protocol: WebService.getProto(req),
             host: req.headers['host'],
             username: user.name,
             password: user.password
@@ -328,7 +334,7 @@ var WebService = (function () {
         });
         var fields = {
             device_id: _.result(req.resourceURL.query, 'device_id', ''),
-            protocol: req.httpRequest.protocol || "http",
+            protocol: req.httpRequest.headers["x-forwarded-proto"] || req.httpRequest.protocol || "http",
             host: req.httpRequest.headers['host'],
             username: user.name,
             password: user.password

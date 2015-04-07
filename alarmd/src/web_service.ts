@@ -62,6 +62,14 @@ export class WebService {
     ;
   }
 
+  static getProto(req:express.Request):string {
+    var fwdProto = req.header('x-forwarded-proto');
+    if (!U.isNullOrUndefined(fwdProto))
+      return fwdProto;
+
+    return req.protocol;
+  }
+
   static replaceFields(req:express.Request, res:express.Response, next:Function):void {
 
     var authorization = req.headers["authorization"] || req.query.authorization;
@@ -69,7 +77,7 @@ export class WebService {
 
     var fields:Fields = {
       device_id: _.result(req.query, 'device_id', ''),
-      protocol: req.protocol,
+      protocol: WebService.getProto(req),
       host: req.headers['host'],
       username: (basicAuthUser) ? basicAuthUser.name : null,
       password: (basicAuthUser) ? basicAuthUser.pass : null
@@ -381,7 +389,7 @@ export class WebService {
 
     var fields:Fields = {
       device_id: _.result(req.query, 'device_id', ''),
-      protocol: req.protocol,
+      protocol: WebService.getProto(req),
       host: req.headers['host'],
       username: user.name,
       password: user.password
@@ -456,7 +464,7 @@ export class WebService {
 
     var fields:Fields = {
       device_id: _.result(req.resourceURL.query, 'device_id', ''),
-      protocol: req.httpRequest.protocol || "http",
+      protocol: req.httpRequest.headers["x-forwarded-proto"] || req.httpRequest.protocol || "http",
       host: req.httpRequest.headers['host'],
       username: user.name,
       password: user.password
