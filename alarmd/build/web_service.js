@@ -365,7 +365,7 @@ var WebService = (function () {
     WebService.checkPinCode = function (req, res) {
         var pinCode = req.headers['x-pincode'];
         var user = domain_info.DomainInfo.active.user;
-        if (user.pinCode == null && _.isUndefined(pinCode))
+        if ((user.pinCode == null || !user.forcePinCode) && _.isUndefined(pinCode))
             return true;
         if (pinCode === user.pinCode)
             return true;

@@ -39,8 +39,18 @@
       <file leaf-file-name="web_service.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/web_service.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.27984345">
-              <caret line="66" column="39" selection-start-line="66" selection-start-column="39" selection-end-line="66" selection-end-column="39" />
+            <state vertical-scroll-proportion="0.30332682">
+              <caret line="503" column="34" selection-start-line="503" selection-start-column="34" selection-end-line="503" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="auth.ts" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/auth.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="39" column="23" selection-start-line="39" selection-start-column="23" selection-end-line="39" selection-end-column="23" />
               <folding />
             </state>
           </provider>
@@ -1030,12 +1040,12 @@
       <workItem from="1427986711844" duration="406000" />
       <workItem from="1427987333691" duration="43994000" />
       <workItem from="1428229865811" duration="4362000" />
-      <workItem from="1428332952153" duration="9421000" />
+      <workItem from="1428332952153" duration="9822000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="285621000" />
+    <option name="totallyTimeSpent" value="286022000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1129,7 +1139,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="398" />
+      <option name="time" value="399" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="NodeJSConfigurationType">
@@ -1359,14 +1369,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/auth.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="32" column="44" selection-start-line="32" selection-start-column="44" selection-end-line="32" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/item.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1543,10 +1545,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/auth.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="39" column="23" selection-start-line="39" selection-start-column="23" selection-end-line="39" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/web_service.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27984345">
-          <caret line="66" column="39" selection-start-line="66" selection-start-column="39" selection-end-line="66" selection-end-column="39" />
+        <state vertical-scroll-proportion="0.30332682">
+          <caret line="503" column="34" selection-start-line="503" selection-start-column="34" selection-end-line="503" selection-end-column="34" />
           <folding />
         </state>
       </provider>
