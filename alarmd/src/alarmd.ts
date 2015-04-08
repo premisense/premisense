@@ -442,6 +442,8 @@ if (configJson['webService']) {
     _.forEach(v['filters'], (h) => {
       if (h === 'replaceFields') {
         args.push(web_service.WebService.replaceFields);
+      } else if (h === 'authFilter') {
+        args.push(web_service.WebService.authFilter);
       } else {
         configError(util.format("unknown filter: %s", h));
       }
