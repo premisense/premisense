@@ -14,6 +14,7 @@
 ///<reference path="../typings/moment/moment.d.ts"/>
 ///<reference path="../typings/nedb/nedb.d.ts"/>
 ///<reference path="../typings/morgan/morgan.d.ts"/>
+///<reference path="../typings/split/split.d.ts"/>
 
 declare module "mqtt" {
   import eventsModule = require('events')

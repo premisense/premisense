@@ -12,6 +12,7 @@ import compression = require('compression')
 import domain = require('domain')
 import morgan = require('morgan')
 import stream = require('stream')
+import split = require('split')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -48,9 +49,15 @@ export class WebService {
     this.options = options;
 
 
-    //TODO pipe morgan log through logger stream
-    var logFormat = 'info: [:date[clf]] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
-    var morganLogger:express.RequestHandler = morgan(logFormat);
+    var logStream = through().pipe(split())
+      .on('data', (line) => {
+        logger.info(line);
+      });
+
+    var logFormat = ':remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
+    var morganLogger:express.RequestHandler = morgan(logFormat, {
+      stream: logStream
+    });
 
     this.app
       .use(morganLogger)
