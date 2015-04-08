@@ -7,6 +7,7 @@ var _ = require('lodash');
 var Q = require('q');
 var compression = require('compression');
 var domain = require('domain');
+var morgan = require('morgan');
 var U = require('./u');
 var itemModule = require('./item');
 var domain_info = require('./domain_info');
@@ -17,7 +18,10 @@ var WebService = (function () {
     function WebService(options) {
         this.app = express();
         this.options = options;
-        this.app.use(WebService.domainWrapper).use(WebService.bodyReader).use(compression()).get('/', WebService.home).get('/login', WebService.authFilter, WebService.apiFilter, WebService.login).get('/events', WebService.authFilter, WebService.apiFilter, WebService.getEvents).post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState).post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor).post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming).get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory).get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog);
+        //TODO pipe morgan log through logger stream
+        var logFormat = 'info: [:date[clf]] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
+        var morganLogger = morgan(logFormat);
+        this.app.use(morganLogger).use(WebService.domainWrapper).use(WebService.bodyReader).use(compression()).get('/', WebService.home).get('/login', WebService.authFilter, WebService.apiFilter, WebService.login).get('/events', WebService.authFilter, WebService.apiFilter, WebService.getEvents).post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState).post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor).post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming).get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory).get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog);
     }
     WebService.getProto = function (req) {
         var fwdProto = req.header('x-forwarded-proto');

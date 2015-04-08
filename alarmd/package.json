@@ -19,7 +19,8 @@
     "websocket": "*",
     "yargs": "*",
     "request": "*",
-    "winston": "*"
+    "winston": "*",
+    "morgan": "*"
   },
 
   "devDependencies": {

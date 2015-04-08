@@ -10,6 +10,8 @@ import _ = require('lodash')
 import Q = require('q')
 import compression = require('compression')
 import domain = require('domain')
+import morgan = require('morgan')
+import stream = require('stream')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -46,7 +48,12 @@ export class WebService {
     this.options = options;
 
 
+    //TODO pipe morgan log through logger stream
+    var logFormat = 'info: [:date[clf]] :remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
+    var morganLogger:express.RequestHandler = morgan(logFormat);
+
     this.app
+      .use(morganLogger)
       .use(WebService.domainWrapper)
       .use(WebService.bodyReader)
       .use(compression())
@@ -349,18 +356,18 @@ export class WebService {
 
     service.Service.instance.armedStates.active.updateLogEvent()
       .then(() => {
-      service.Service.instance.eventLog.query()
-        .then((events:event_log.Event[]) => {
-          var eventsJsons = [];
-          _.forEach(events, (e) => {
-            eventsJsons.push(e.toJson());
-          }, this);
-          var response = JSON.stringify(eventsJsons);
-          res.status(200).send(response);
-        }, (err) => {
-          res.status(500).send("failed to process query. event logged.");
-        });
-    });
+        service.Service.instance.eventLog.query()
+          .then((events:event_log.Event[]) => {
+            var eventsJsons = [];
+            _.forEach(events, (e) => {
+              eventsJsons.push(e.toJson());
+            }, this);
+            var response = JSON.stringify(eventsJsons);
+            res.status(200).send(response);
+          }, (err) => {
+            res.status(500).send("failed to process query. event logged.");
+          });
+      });
 
   }
 
