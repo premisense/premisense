@@ -14,6 +14,7 @@ NODE_PATH=$(which node)
 
 
 	if [ -f /lib/lsb/init-functions ]
+	then
 		echo generating init.d script /etc/init.d/sensord
 		$DIR/gen_init_d.sh
 	fi
