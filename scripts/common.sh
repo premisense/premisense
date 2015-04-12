@@ -33,17 +33,17 @@ function check_gplusplus() {
 
 function check_node() {
 	which node 2>/dev/null >/dev/null || die "could not find node or it is not installed. follow TBD:URL on how to upgrade/install"
-	if ! vercmp "$(node -v)" ge "0.11.12"
+	if ! vercmp "$(node -v)" ge "0.12.1"
 	then
-		die "expecting node v0.11.12 or higher. follow TBD:URL on how to upgrade/install"
+		die "expecting node 0.12.1 or higher. follow TBD:URL on how to upgrade/install"
 	fi
 }
 
 function check_npm() {
 	which npm 2>/dev/null >/dev/null || die "could not find npm or it is not installed. to upgrade to the latest, run: 'npm update -g npm'"
-	if ! vercmp "$(npm -v)" ge "2.6.0"
+	if ! vercmp "$(npm -v)" ge "2.5.1"
 	then
-		die "expecting npm 2.6.0 or higher. to upgrade to the latest, run: 'npm update -g npm'"
+		die "expecting npm 2.5.1 or higher. to upgrade to the latest, run: 'npm update -g npm'"
 	fi
 }
 
