@@ -21,6 +21,7 @@
     "yargs": "*",
     "request": "*",
     "winston": "*",
+    "winston-syslog": "*",
     "morgan": "*"
   },
 

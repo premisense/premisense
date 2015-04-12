@@ -5,6 +5,7 @@ var util = require('util');
 var yargs = require('yargs');
 var _ = require('lodash');
 var winston = require('winston');
+var winston_syslog = require('winston-syslog');
 var express = require('express');
 var U = require('./u');
 var itemModule = require('./item');
@@ -20,6 +21,9 @@ var sensor_history = require('./sensor_history');
 var MqttHub = hubModule.MqttHub;
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
+// the below exposes the Syslog transport
+var syslog = winston_syslog.Syslog;
+process.title = "alarmd";
 var systemItems = new serviceModule.SystemItems();
 //--------------------------------------------------------------------------
 winston.setLevels({
@@ -54,11 +58,12 @@ var args = yargs.usage("Usage: $0 -c config [options]").help('h').alias('h', 'he
 }).option('l', {
     alias: 'log',
     demand: false,
-    describe: 'per module log level. e.g. "-l item:debug"'
-}).option('q', {
-    alias: 'quiet',
+    describe: 'add (winston) log transport. available transports: console:options | file:options | syslog:options | DailyRotateFile:options',
+    type: 'string'
+}).option('m', {
+    alias: 'module',
     demand: false,
-    describe: 'do not log to console'
+    describe: 'per module log level. e.g. "-m item:debug"'
 }).option('c', {
     alias: 'config',
     demand: false,
@@ -66,10 +71,10 @@ var args = yargs.usage("Usage: $0 -c config [options]").help('h').alias('h', 'he
     describe: 'config file',
     type: 'string'
 }).strict().parse(process.argv);
-if (args['l']) {
-    var logParams = args['l'];
+if (args['m']) {
+    var logParams = args['m'];
     if (!_.isArray(logParams))
-        logParams = [args['l']];
+        logParams = [args['m']];
     _.forEach(logParams, function (x) {
         var params = x.split(':');
         if (params.length !== 2) {
@@ -89,11 +94,64 @@ if (args['v']) {
     console.log("v" + packageJson.version);
     process.exit(0);
 }
+var cliError = function (msg) {
+    console.error("CLI error: " + msg);
+    process.exit(10);
+};
 var debugLog = (args['d']) ? true : false;
 winston.remove(winston.transports.Console);
-if (!args['q']) {
-    var colorize = tty.isatty(1);
-    winston.add(winston.transports.Console, { level: (debugLog) ? 'debug' : 'info', colorize: colorize });
+var appendTransport = function (transportType, options) {
+    transportType = transportType.toLowerCase();
+    if (_.isString(options)) {
+        options = JSON.parse(options);
+    }
+    if (transportType === 'console') {
+        if (U.isNullOrUndefined(options)) {
+            var colorize = tty.isatty(1);
+            options = { level: (debugLog) ? 'debug' : 'info', colorize: colorize };
+        }
+        winston.add(winston.transports.Console, options);
+        return true;
+    }
+    else if (transportType === 'file') {
+        winston.add(winston.transports.File, options);
+        return true;
+    }
+    else if (transportType === 'dailyrotatefile') {
+        winston.add(winston.transports.DailyRotateFile, options);
+        return true;
+    }
+    else if (transportType === 'syslog') {
+        var transports;
+        transports = winston.transports;
+        winston.add(transports.Syslog, options);
+        return true;
+    }
+    return false;
+};
+if (!args['l']) {
+    appendTransport('console');
+}
+else {
+    var logTransports = args['l'];
+    if (!_.isArray(logTransports)) {
+        logTransports = [logTransports];
+    }
+    _.forEach(logTransports, function (logTransportParam) {
+        var pos = logTransportParam.indexOf(':');
+        var transportType;
+        var transportOptions;
+        if (pos > 0) {
+            transportType = logTransportParam.substr(0, pos);
+            transportOptions = logTransportParam.substr(pos + 1);
+        }
+        else {
+            transportType = logTransportParam;
+        }
+        if (!appendTransport(transportType, transportOptions)) {
+            cliError("failed to add transport: " + logTransportParam);
+        }
+    });
 }
 //--------------------------------------------------------------------------
 //      load config file
@@ -101,10 +159,6 @@ if (!args['q']) {
 var configJson = JSON.parse(fs.readFileSync(args['c'], 'utf8'));
 var configError = function (msg) {
     console.error("config error: " + msg);
-    process.exit(10);
-};
-var cliError = function (msg) {
-    console.error("CLI error: " + msg);
     process.exit(10);
 };
 //--------------------------------------------------------------------------

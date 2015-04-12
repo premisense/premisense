@@ -14,7 +14,9 @@
     "through": "*",
     "yargs": "*",
     "winston": "*",
-    "serial": "*"
+    "serial": "*",
+    "serialport": "*",
+    "winston-syslog": "*"
   },
 
   "devDependencies": {

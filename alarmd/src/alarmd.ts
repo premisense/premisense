@@ -8,6 +8,7 @@ import util = require('util')
 import yargs = require('yargs')
 import _ = require('lodash')
 import winston = require('winston');
+import winston_syslog = require('winston-syslog')
 import os = require('os')
 import Q = require('q')
 import express = require('express')
@@ -31,6 +32,9 @@ import MqttHub = hubModule.MqttHub;
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
 
+// the below exposes the Syslog transport
+var syslog = winston_syslog.Syslog;
+process.title = "alarmd";
 var systemItems = new serviceModule.SystemItems();
 
 //--------------------------------------------------------------------------
@@ -74,12 +78,13 @@ var args:{[key:string]: any } = yargs
     .option('l', {
       alias: 'log',
       demand: false,
-      describe: 'per module log level. e.g. "-l item:debug"'
+      describe: 'add (winston) log transport. available transports: console:options | file:options | syslog:options | DailyRotateFile:options',
+      type: 'string'
     })
-    .option('q', {
-      alias: 'quiet',
+    .option('m', {
+      alias: 'module',
       demand: false,
-      describe: 'do not log to console'
+      describe: 'per module log level. e.g. "-m item:debug"'
     })
     .option('c', {
       alias: 'config',
@@ -92,10 +97,10 @@ var args:{[key:string]: any } = yargs
     .parse(process.argv)
   ;
 
-if (args['l']) {
-  var logParams = args['l'];
+if (args['m']) {
+  var logParams = args['m'];
   if (!_.isArray(logParams))
-    logParams = [args['l']];
+    logParams = [args['m']];
   _.forEach(logParams, (x:string) => {
     var params = x.split(':');
     if (params.length !== 2) {
@@ -119,15 +124,74 @@ if (args['v']) {
   process.exit(0);
 }
 
+var cliError = (msg:string) => {
+  console.error("CLI error: " + msg);
+  process.exit(10);
+};
+
+
 var debugLog = (args['d']) ? true : false;
 
 winston.remove(winston.transports.Console);
-if (!args['q']) {
-  var colorize:boolean = tty.isatty(1);
-  winston.add(winston.transports.Console, {level: (debugLog) ? 'debug' : 'info', colorize: colorize});
 
+var appendTransport = (transportType:string, options?:any):boolean =>  {
+  transportType = transportType.toLowerCase();
+
+  if (_.isString(options)) {
+    options = JSON.parse(options);
+  }
+
+  if (transportType === 'console') {
+    if (U.isNullOrUndefined(options)) {
+      var colorize : boolean = tty.isatty(1);
+      options = {level: (debugLog) ? 'debug' : 'info', colorize: colorize};
+    }
+
+    winston.add(winston.transports.Console, options);
+    return true;
+
+  } else if (transportType === 'file') {
+    winston.add(winston.transports.File, options);
+    return true;
+
+  } else if (transportType === 'dailyrotatefile') {
+    winston.add(winston.transports.DailyRotateFile, options);
+    return true;
+
+  } else if (transportType === 'syslog') {
+    var transports:any;
+    transports = winston.transports;
+    winston.add(transports.Syslog, options);
+    return true;
+
+  }
+
+  return false;
+};
+
+if (!args['l']) {
+  appendTransport('console');
+} else {
+  var logTransports = args['l'];
+  if (!_.isArray(logTransports)) {
+    logTransports = [logTransports];
+  }
+
+  _.forEach(logTransports, (logTransportParam:string) => {
+    var pos = logTransportParam.indexOf(':');
+    var transportType:string;
+    var transportOptions:any;
+    if (pos > 0) {
+      transportType = logTransportParam.substr(0, pos);
+      transportOptions = logTransportParam.substr(pos+1);
+    } else {
+      transportType = logTransportParam;
+    }
+    if (!appendTransport(transportType, transportOptions)) {
+      cliError("failed to add transport: " + logTransportParam);
+    }
+  });
 }
-
 //--------------------------------------------------------------------------
 //      load config file
 //--------------------------------------------------------------------------
@@ -138,12 +202,6 @@ var configError = (msg:string) => {
   console.error("config error: " + msg);
   process.exit(10);
 };
-
-var cliError = (msg:string) => {
-  console.error("CLI error: " + msg);
-  process.exit(10);
-};
-
 
 //--------------------------------------------------------------------------
 //      collection of all groups

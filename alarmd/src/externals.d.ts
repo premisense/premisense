@@ -29,12 +29,8 @@ declare module "mqtt" {
 }
 
 
-//declare module "sf" {
-//
-//  interface SF {
-//    (...args: any[]):string;
-//  }
-//
-//  var sf: SF;
-//  export = sf;
-//}
+declare module "winston-syslog" {
+  export class Syslog{
+    constructor(options: any);
+  }
+}
