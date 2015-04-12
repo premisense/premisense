@@ -15,7 +15,7 @@ During the development of the project, we realized it is not just an alarm syste
 	- Optional H/A module that uses battery backup and multiple internet connections (i.e. VDSL, mobile...) for automatic failover.
 	- Easily connect your sensors to home automation controlers such as OpenHab via buitin MQTT support
 	- Take advantage of existing investments in your home security system
-	- Built with large (home) scale with up to  of sensors with multiple Arduinos connected over I2C protocol
+	- Built with large (home) scale with up to hundreds of sensors with multiple Arduinos connected over I2C protocol
 
 ## High Level System Modules
 
