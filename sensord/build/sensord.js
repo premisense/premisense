@@ -72,10 +72,14 @@ var appendTransport = function (transportType, options) {
     if (_.isString(options)) {
         options = JSON.parse(options);
     }
+    if (U.isNullOrUndefined(options)) {
+        options = {};
+    }
+    options.level = (debugLog) ? 'debug' : 'info';
     if (transportType === 'console') {
-        if (U.isNullOrUndefined(options)) {
+        if (U.isNullOrUndefined(options['colorize'])) {
             var colorize = tty.isatty(1);
-            options = { level: (debugLog) ? 'debug' : 'info', colorize: colorize };
+            options.colorize = colorize;
         }
         winston.add(winston.transports.Console, options);
         return true;
