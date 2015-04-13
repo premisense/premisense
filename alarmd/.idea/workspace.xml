@@ -4,7 +4,12 @@
     <bookmark url="file://$PROJECT_DIR$/src/item.ts" line="783" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8dd1a2d-42f1-4e56-89db-e3e47c711cb0" name="Default" comment="" />
+    <list default="true" id="e8dd1a2d-42f1-4e56-89db-e3e47c711cb0" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/alarmd.ts" afterPath="$PROJECT_DIR$/src/alarmd.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/gen_init_d.sh" afterPath="$PROJECT_DIR$/scripts/gen_init_d.sh" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/build/sensord.js" afterPath="$PROJECT_DIR$/../sensord/build/sensord.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/src/sensord.ts" afterPath="$PROJECT_DIR$/../sensord/src/sensord.ts" />
+    </list>
     <ignored path="alarmd.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -29,8 +34,8 @@
       <file leaf-file-name="alarmd.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/alarmd.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5870842">
-              <caret line="152" column="0" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.6164383">
+              <caret line="159" column="51" selection-start-line="159" selection-start-column="51" selection-end-line="159" selection-end-column="51" />
               <folding />
             </state>
           </provider>
@@ -1055,12 +1060,12 @@
       <workItem from="1427987333691" duration="43994000" />
       <workItem from="1428229865811" duration="4362000" />
       <workItem from="1428332952153" duration="14618000" />
-      <workItem from="1428571892324" duration="8500000" />
+      <workItem from="1428571892324" duration="8521000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="299318000" />
+    <option name="totallyTimeSpent" value="299339000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1564,8 +1569,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/alarmd.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5870842">
-          <caret line="152" column="0" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.6164383">
+          <caret line="159" column="51" selection-start-line="159" selection-start-column="51" selection-end-line="159" selection-end-column="51" />
           <folding />
         </state>
       </provider>

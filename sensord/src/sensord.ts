@@ -120,6 +120,7 @@ var appendTransport = (transportType:string, options?:any):boolean =>  {
     return true;
 
   } else if (transportType === 'syslog') {
+    options.json = false;
     var transports:any;
     transports = winston.transports;
     winston.add(transports.Syslog, options);

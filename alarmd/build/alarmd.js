@@ -126,6 +126,7 @@ var appendTransport = function (transportType, options) {
         return true;
     }
     else if (transportType === 'syslog') {
+        options.json = false;
         var transports;
         transports = winston.transports;
         winston.add(transports.Syslog, options);

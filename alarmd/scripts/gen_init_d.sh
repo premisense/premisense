@@ -31,7 +31,6 @@ set -e
 
 declare -a DAEMON_OPTS
 
-DAEMON_OPTS+=("-d")
 DAEMON_OPTS+=("-l" "syslog:{\"protocol\":\"unix\",\"path\":\"/dev/log\"}")
 DAEMON_OPTS+=("-l" "DailyRotateFile:{\"filename\":\"/var/log/alarmd.log\"}")
 CONF=/etc/alarmd.conf
