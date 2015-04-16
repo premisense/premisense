@@ -7,13 +7,11 @@ var assert = require('assert');
 var _ = require('lodash');
 var Q = require('q');
 var compression = require('compression');
-var domain = require('domain');
 var morgan = require('morgan');
 var split = require('split');
 var U = require('./u');
 var itemModule = require('./item');
-var domain_info = require('./domain_info');
-var service = require('./service');
+var di = require('./domain_info');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 var WebService = (function () {
@@ -61,17 +59,11 @@ var WebService = (function () {
         next();
     };
     WebService.domainWrapper = function (req, res, next) {
-        var self = service.Service.instance.webService;
-        var d = domain.create();
-        d.on('error', function (err) {
-            logger.error("domain error: %s. stack:%s", err, err.stack);
-        });
-        var domainInfo = new domain_info.DomainInfo();
-        var dom = d;
-        dom.domainInfo = d;
-        d.add(req);
-        d.add(res);
-        d.run(function () {
+        var self = di.service.webService;
+        var domainInfo = di.create(di.active);
+        domainInfo.domain.add(req);
+        domainInfo.domain.add(res);
+        domainInfo.domain.run(function () {
             next();
             //self.app.router(req, res, next);
         });
@@ -97,13 +89,13 @@ var WebService = (function () {
         var user = null;
         var basicAuthUser = WebService.parseAuth(authorization);
         if (!basicAuthUser) {
-            if (service.Service.instance.users.isBypassAuthIp(ip))
-                user = service.Service.instance.users.getAdmin();
+            if (di.service.users.isBypassAuthIp(ip))
+                user = di.service.users.getAdmin();
             else
-                user = service.Service.instance.users.getAnonymous();
+                user = di.service.users.getAnonymous();
         }
         else {
-            user = service.Service.instance.users.authenticate(basicAuthUser.name, basicAuthUser.pass);
+            user = di.service.users.authenticate(basicAuthUser.name, basicAuthUser.pass);
         }
         if (user == null) {
             reject(401, "authorization failed");
@@ -119,14 +111,11 @@ var WebService = (function () {
             res.status(code).send(description);
         })) == null)
             return;
-        // we expect the first filter to assign a new domain for this request
-        assert(domain_info.DomainInfo.active != domain_info.DomainInfo.global);
-        domain_info.DomainInfo.active.user = user;
+        di.user = user;
         next();
     };
     WebService.checkApi = function (req, reject) {
-        assert(domain_info.DomainInfo.active != domain_info.DomainInfo.global);
-        var user = domain_info.DomainInfo.active.user;
+        var user = di.user;
         if (!user.accessRestApi) {
             reject(401, "authorization required");
             return false;
@@ -211,7 +200,7 @@ var WebService = (function () {
                 }, 5);
             }
         };
-        var strm = service.Service.instance.events.stream(since);
+        var strm = di.itemEvents.stream(since);
         var uniqueEvents = {};
         strm.on('data', function (itemEvent) {
             var dupEventJson = _.cloneDeep(itemEvent.json);
@@ -235,12 +224,12 @@ var WebService = (function () {
             res.status(400).send("expecting item parameter");
             return;
         }
-        var item = service.Service.instance.items.all.at(itemId);
+        var item = di.service.items.all.at(itemId);
         if (U.isNullOrUndefined(item)) {
             res.status(400).send("no such item");
             return;
         }
-        service.Service.instance.sensorHistory.query(itemId).then(function (itemHistory) {
+        di.service.sensorHistory.query(itemId).then(function (itemHistory) {
             var response = JSON.stringify(itemHistory.history);
             res.status(200).send(response);
         }, function (err) {
@@ -249,8 +238,8 @@ var WebService = (function () {
     };
     WebService.getEventLog = function (req, res) {
         var _this = this;
-        service.Service.instance.armedStates.active.updateLogEvent().then(function () {
-            service.Service.instance.eventLog.query().then(function (events) {
+        di.service.armedStates.active.updateLogEvent().then(function () {
+            di.service.eventLog.query().then(function (events) {
                 var eventsJsons = [];
                 _.forEach(events, function (e) {
                     eventsJsons.push(e.toJson());
@@ -281,7 +270,7 @@ var WebService = (function () {
             res.status(400).send("invalid maxSize format");
             return;
         }
-        var user = domain_info.DomainInfo.active.user;
+        var user = di.user;
         var fields = {
             device_id: _.result(req.query, 'device_id', ''),
             protocol: WebService.getProto(req),
@@ -374,7 +363,7 @@ var WebService = (function () {
     };
     WebService.checkPinCode = function (req, res) {
         var pinCode = req.headers['x-pincode'];
-        var user = domain_info.DomainInfo.active.user;
+        var user = di.user;
         if ((user.pinCode == null || !user.forcePinCode) && _.isUndefined(pinCode))
             return true;
         if (pinCode === user.pinCode)
@@ -387,7 +376,7 @@ var WebService = (function () {
         return false;
     };
     WebService.postArmedState = function (req, res) {
-        var armedState = service.Service.instance.armedStates.at(req.body);
+        var armedState = di.service.armedStates.at(req.body);
         if (armedState == null) {
             res.status(400).send("no such armed state");
         }
@@ -400,26 +389,26 @@ var WebService = (function () {
     WebService.postBypassSensor = function (req, res) {
         if (!WebService.checkPinCode(req, res))
             return;
-        var item = service.Service.instance.armedStates.active.at(req.body);
+        var item = di.service.armedStates.active.at(req.body);
         if (item == null) {
             res.status(400).send(util.format("unknown sensor '%s' or not armed", req.body));
             return;
         }
-        service.Service.instance.armedStates.active.bypass(item);
+        di.service.armedStates.active.bypass(item);
         res.status(200).send("OK\n");
     };
     WebService.postCancelArming = function (req, res) {
-        if (service.Service.instance.armedStates.prev == null) {
+        if (di.service.armedStates.prev == null) {
             res.status(400).send("no prev armed state");
             return;
         }
-        if (service.Service.instance.armedStates.active.timeLeft == 0) {
+        if (di.service.armedStates.active.timeLeft == 0) {
             res.status(400).send("already armed");
             return;
         }
         if (!WebService.checkPinCode(req, res))
             return;
-        service.Service.instance.armedStates.prev.activate().then(function () {
+        di.service.armedStates.prev.activate().then(function () {
             res.status(200).send("OK\n");
         });
     };

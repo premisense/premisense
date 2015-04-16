@@ -10,7 +10,7 @@ var Q = require('q');
 var assert = require('assert');
 var _ = require('lodash');
 var itemModule = require('./item');
-var service = require('./service');
+var di = require('./domain_info');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 var RuleDefinition = (function () {
@@ -55,7 +55,7 @@ var Rule = (function (_super) {
         };
     };
     Rule.prototype.getRule = function (t) {
-        return service.Service.instance.ruleEngine.getRule(t);
+        return di.service.ruleEngine.getRule(t);
     };
     Rule.prototype.toJson = function () {
         var ret = _super.prototype.toJson.call(this);

@@ -77,6 +77,7 @@ export interface PushoverOptions {
   defaultSound?:string;
   defaultPriority?:Priority;
   prioritySoundMap?:{[priority:number]: string};
+  localAddress?:string;
 }
 
 export class Pushover extends PushNotification {
@@ -86,6 +87,7 @@ export class Pushover extends PushNotification {
   defaultPriority:Priority;
   defaultSound:string;
   prioritySoundMap:{[priority:number]: string};
+  localAddress:string;
   static priorityMap:{[priority:number]:number} = {
     0: 0,
     1: 1,
@@ -101,6 +103,7 @@ export class Pushover extends PushNotification {
     this.defaultPriority = o.defaultPriority;
     this.defaultSound = o.defaultSound;
     this.prioritySoundMap = o.prioritySoundMap;
+    this.localAddress = o.localAddress;
   }
 
   send(msg:Message):Q.Promise<boolean> {
@@ -156,7 +159,7 @@ export class Pushover extends PushNotification {
     //});
     var u = "https://api.pushover.net:443/1/messages.json";
 
-    request.post({url:u, formData:params}, (error, response, body) => {
+    request.post({url:u, formData:params, localAddress:this.localAddress}, (error, response, body) => {
       if (!error && response.statusCode == 200) {
         logger.info("pushover notification completed. body: ", body);
         deferred.resolve(true);

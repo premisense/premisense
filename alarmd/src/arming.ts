@@ -10,7 +10,7 @@ import U = require('./u')
 import itemModule = require('./item')
 import service = require('./service')
 import event_log = require('./event_log');
-import domain_info = require('./domain_info')
+import di = require('./domain_info')
 
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -175,11 +175,11 @@ export class ArmedState extends Group {
   }
 
   isActive():boolean {
-    return service.Service.instance.armedStates.active == this;
+    return di.service.armedStates.active == this;
   }
 
   activate():Q.Promise<boolean> {
-    return service.Service.instance.armedStates.activate(this);
+    return di.service.armedStates.activate(this);
   }
 
   bypass(item:Item):void {
@@ -204,7 +204,7 @@ export class ArmedState extends Group {
   updateLogEvent():Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
 
-    var userName = domain_info.DomainInfo.active.user.name;
+    var userName = di.user.name;
 
     var persist:boolean = false;
     if (_.isNull(ArmedState.logEvent)) {
@@ -251,7 +251,7 @@ export class ArmedState extends Group {
     }
 
     if (persist) {
-      service.Service.instance.eventLog.log(ArmedState.logEvent)
+      di.service.eventLog.log(ArmedState.logEvent)
       .then(() => {
           deferred.resolve(true);
         });

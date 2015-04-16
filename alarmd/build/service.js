@@ -1,6 +1,7 @@
 var Q = require('q');
 var assert = require('assert');
 var _ = require('lodash');
+var U = require('./u');
 var itemModule = require('./item');
 var hubModule = require('./hub');
 var arming = require('./arming');
@@ -8,7 +9,6 @@ var web_service = require('./web_service');
 var push_notification = require('./push_notification');
 var event_log = require('./event_log');
 var rule_engine = require('./rule_engine');
-var domain_info = require('./domain_info');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 var Group = itemModule.Group;
@@ -78,9 +78,8 @@ var ServiceOptions = (function () {
 exports.ServiceOptions = ServiceOptions;
 var Service = (function () {
     function Service(o) {
-        this._events = itemModule.ItemEvents.instance;
-        assert(Service._instance == null);
-        Service._instance = this;
+        assert(U.isNullOrUndefined(o.domainInfo.service));
+        o.domainInfo.service = this;
         this._items = o.items;
         this._hubs = o.hubs;
         this._armedStates = o.armedStates;
@@ -92,15 +91,9 @@ var Service = (function () {
         this._pushNotification = o.pushNotification;
         this._eventLog = o.eventLog;
         this._sensorHistory = o.sensorHistory;
+        this._domainInfo = o.domainInfo;
+        this._mqttClient = o.mqttClient;
     }
-    Object.defineProperty(Service, "instance", {
-        get: function () {
-            assert(Service._instance != null);
-            return Service._instance;
-        },
-        enumerable: true,
-        configurable: true
-    });
     Object.defineProperty(Service.prototype, "pushNotification", {
         get: function () {
             return this._pushNotification;
@@ -118,13 +111,6 @@ var Service = (function () {
     Object.defineProperty(Service.prototype, "users", {
         get: function () {
             return this._users;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Service.prototype, "events", {
-        get: function () {
-            return this._events;
         },
         enumerable: true,
         configurable: true
@@ -171,10 +157,48 @@ var Service = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Service.prototype, "mqttClient", {
+        get: function () {
+            return this._mqttClient;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Service.prototype.start = function () {
+        var _this = this;
         var deferred = Q.defer();
-        domain_info.DomainInfo.global.user = this.users.getAdmin();
-        this._start(deferred);
+        logger.debug("waiting for mqtt connection");
+        var started = false;
+        var self = this;
+        this._domainInfo.domain.run(function () {
+            _this.mqttClient.on('connect', function () {
+                if (!started) {
+                    started = true;
+                    logger.debug("connected to mqtt. starting service...");
+                    self._start(deferred);
+                    deferred.promise.then(function (result) {
+                        if (result)
+                            logger.info("service started");
+                        else {
+                            logger.info("failed to start service. exiting");
+                            process.exit(1);
+                        }
+                    });
+                }
+                else {
+                    logger.info("reconnected to mqtt. re-subscribing to topics...");
+                }
+            });
+            self.mqttClient.on('disconnect', function () {
+                logger.warn("disconnected from mqtt");
+            });
+            self.mqttClient.on('close', function () {
+                logger.warn("mqtt closed connection");
+            });
+            self.mqttClient.on('error', function (err) {
+                logger.warn("mqtt error: " + err);
+            });
+        });
         return deferred.promise;
     };
     Service.prototype._start = function (deferred) {
@@ -220,7 +244,6 @@ var Service = (function () {
             }
         });
     };
-    Service._instance = null;
     return Service;
 })();
 exports.Service = Service;

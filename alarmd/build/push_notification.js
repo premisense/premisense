@@ -56,6 +56,7 @@ var Pushover = (function (_super) {
         this.defaultPriority = o.defaultPriority;
         this.defaultSound = o.defaultSound;
         this.prioritySoundMap = o.prioritySoundMap;
+        this.localAddress = o.localAddress;
     }
     Pushover.prototype.send = function (msg) {
         var deferred = Q.defer();
@@ -100,7 +101,7 @@ var Pushover = (function (_super) {
         //  formData.append(k, v);
         //});
         var u = "https://api.pushover.net:443/1/messages.json";
-        request.post({ url: u, formData: params }, function (error, response, body) {
+        request.post({ url: u, formData: params, localAddress: this.localAddress }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 logger.info("pushover notification completed. body: ", body);
                 deferred.resolve(true);

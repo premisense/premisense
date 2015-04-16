@@ -6,6 +6,7 @@ import Q = require('q')
 import assert = require('assert')
 import _ = require('lodash')
 import domain = require('domain')
+import mqtt = require('mqtt')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -17,7 +18,7 @@ import push_notification = require('./push_notification')
 import event_log = require('./event_log')
 import sensor_history = require('./sensor_history')
 import rule_engine = require('./rule_engine')
-import domain_info = require('./domain_info')
+import di = require('./domain_info')
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
 
@@ -80,6 +81,7 @@ export class SystemItems {
 
 export class ServiceOptions {
   items:SystemItems;
+  mqttClient:mqtt.Client;
   armedStates:ArmedStates;
   siren:Siren;
   users:auth.Users;
@@ -89,16 +91,10 @@ export class ServiceOptions {
   ruleEngine:RuleEngine;
   eventLog:event_log.EventLog;
   sensorHistory:sensor_history.SensorHistory;
+  domainInfo:di;
 }
 
 export class Service {
-  private static _instance:Service = null;
-
-  static get instance():Service {
-    assert(Service._instance != null);
-    return Service._instance;
-  }
-
   private _items:SystemItems;
   private _hubs:Hub[];
   private _armedStates:ArmedStates;
@@ -110,7 +106,8 @@ export class Service {
 
   private _pushNotification:PushNotification;
   private  _webService:WebService;
-  private _events:itemModule.ItemEvents = itemModule.ItemEvents.instance;
+  private _domainInfo:di;
+  private _mqttClient:mqtt.Client;
 
   get pushNotification():PushNotification {
     return this._pushNotification;
@@ -122,10 +119,6 @@ export class Service {
 
   get users():auth.Users {
     return this._users;
-  }
-
-  get events():itemModule.ItemEvents {
-    return this._events;
   }
 
   get armedStates():ArmedStates {
@@ -152,9 +145,13 @@ export class Service {
     return this._webService;
   }
 
+  get mqttClient():mqtt.Client {
+    return this._mqttClient;
+  }
+
   constructor(o:ServiceOptions) {
-    assert(Service._instance == null);
-    Service._instance = this;
+    assert (U.isNullOrUndefined(o.domainInfo.service));
+    o.domainInfo.service = this;
 
     this._items = o.items;
     this._hubs = o.hubs;
@@ -167,13 +164,50 @@ export class Service {
     this._pushNotification = o.pushNotification;
     this._eventLog = o.eventLog;
     this._sensorHistory = o.sensorHistory;
+    this._domainInfo = o.domainInfo;
+    this._mqttClient = o.mqttClient;
   }
 
   start():Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
 
-    domain_info.DomainInfo.global.user = this.users.getAdmin();
-    this._start(deferred);
+
+    logger.debug("waiting for mqtt connection");
+
+    var started:boolean = false;
+
+    var self = this;
+
+    this._domainInfo.domain.run(() => {
+      this.mqttClient.on('connect', () => {
+        if (!started) {
+          started = true;
+          logger.debug("connected to mqtt. starting service...");
+          self._start(deferred);
+          deferred.promise.then((result) => {
+            if (result)
+              logger.info("service started");
+            else {
+              logger.info("failed to start service. exiting");
+              process.exit(1);
+            }
+          })
+        } else {
+          logger.info("reconnected to mqtt. re-subscribing to topics...");
+        }
+      });
+
+      self.mqttClient.on('disconnect', () => {
+        logger.warn("disconnected from mqtt");
+      });
+      self.mqttClient.on('close', () => {
+        logger.warn("mqtt closed connection");
+      });
+
+      self.mqttClient.on('error', (err) => {
+        logger.warn("mqtt error: " + err);
+      });
+    });
 
     return deferred.promise;
   }

@@ -16,7 +16,7 @@ import split = require('split')
 
 import U = require('./u')
 import itemModule = require('./item')
-import domain_info = require('./domain_info')
+import di = require('./domain_info')
 import auth = require('./auth')
 import service = require('./service')
 import sensor_history = require('./sensor_history')
@@ -118,23 +118,14 @@ export class WebService {
 
   static domainWrapper(req:express.Request, res:express.Response, next:Function):void {
 
-    var self = service.Service.instance.webService;
+    var self = di.service.webService;
 
-    var d = domain.create();
-    d.on('error', (err) => {
-      logger.error("domain error: %s. stack:%s", err, err.stack);
-    });
+    var domainInfo = di.create(di.active);
 
-    var domainInfo = new domain_info.DomainInfo();
+    domainInfo.domain.add(req);
+    domainInfo.domain.add(res);
 
-    var dom:any = d;
-    dom.domainInfo = d;
-
-
-    d.add(req);
-    d.add(res);
-
-    d.run(() => {
+    domainInfo.domain.run(() => {
       next();
       //self.app.router(req, res, next);
     });
@@ -165,12 +156,12 @@ export class WebService {
     var basicAuthUser = WebService.parseAuth(authorization);
 
     if (!basicAuthUser) {
-      if (service.Service.instance.users.isBypassAuthIp(ip))
-        user = service.Service.instance.users.getAdmin();
+      if (di.service.users.isBypassAuthIp(ip))
+        user = di.service.users.getAdmin();
       else
-        user = service.Service.instance.users.getAnonymous();
+        user = di.service.users.getAnonymous();
     } else {
-      user = service.Service.instance.users.authenticate(basicAuthUser.name, basicAuthUser.pass);
+      user = di.service.users.authenticate(basicAuthUser.name, basicAuthUser.pass);
     }
 
     if (user == null) {
@@ -194,16 +185,13 @@ export class WebService {
       })) == null)
       return;
 
-    // we expect the first filter to assign a new domain for this request
-    assert(domain_info.DomainInfo.active != domain_info.DomainInfo.global);
-    domain_info.DomainInfo.active.user = user;
+    di.user = user;
 
     next();
   }
 
   static checkApi(req:express.Request, reject:(code, description) => void):boolean {
-    assert(domain_info.DomainInfo.active != domain_info.DomainInfo.global);
-    var user = domain_info.DomainInfo.active.user;
+    var user = di.user;
 
     if (!user.accessRestApi) {
       reject(401, "authorization required");
@@ -309,7 +297,7 @@ export class WebService {
       }
     };
 
-    var strm = service.Service.instance.events.stream(since);
+    var strm = di.itemEvents.stream(since);
 
     var uniqueEvents = {};
 
@@ -342,14 +330,14 @@ export class WebService {
       return;
     }
 
-    var item:itemModule.Item = service.Service.instance.items.all.at(itemId);
+    var item:itemModule.Item = di.service.items.all.at(itemId);
 
     if (U.isNullOrUndefined(item)) {
       res.status(400).send("no such item");
       return;
     }
 
-    service.Service.instance.sensorHistory.query(itemId)
+    di.service.sensorHistory.query(itemId)
       .then((itemHistory) => {
         var response = JSON.stringify(itemHistory.history);
         res.status(200).send(response);
@@ -361,9 +349,9 @@ export class WebService {
 
   static getEventLog(req:express.Request, res:express.Response):void {
 
-    service.Service.instance.armedStates.active.updateLogEvent()
+    di.service.armedStates.active.updateLogEvent()
       .then(() => {
-        service.Service.instance.eventLog.query()
+        di.service.eventLog.query()
           .then((events:event_log.Event[]) => {
             var eventsJsons = [];
             _.forEach(events, (e) => {
@@ -399,7 +387,7 @@ export class WebService {
       return;
     }
 
-    var user = domain_info.DomainInfo.active.user;
+    var user = di.user;
 
     var fields:Fields = {
       device_id: _.result(req.query, 'device_id', ''),
@@ -513,7 +501,7 @@ export class WebService {
   static checkPinCode(req:express.Request, res:express.Response):boolean {
     var pinCode = req.headers['x-pincode'];
 
-    var user = domain_info.DomainInfo.active.user;
+    var user = di.user;
 
     if ((user.pinCode == null || !user.forcePinCode) && _.isUndefined(pinCode))
       return true;
@@ -531,7 +519,7 @@ export class WebService {
   }
 
   static postArmedState(req:express.Request, res:express.Response):void {
-    var armedState = <arming.ArmedState> service.Service.instance.armedStates.at(req.body);
+    var armedState = <arming.ArmedState> di.service.armedStates.at(req.body);
     if (armedState == null) {
       res.status(400).send("no such armed state");
     }
@@ -549,24 +537,24 @@ export class WebService {
   static postBypassSensor(req:express.Request, res:express.Response):void {
     if (!WebService.checkPinCode(req, res))
       return;
-    var item = service.Service.instance.armedStates.active.at(req.body);
+    var item = di.service.armedStates.active.at(req.body);
     if (item == null) {
       res.status(400).send(util.format("unknown sensor '%s' or not armed", req.body));
       return;
     }
 
-    service.Service.instance.armedStates.active.bypass(item);
+    di.service.armedStates.active.bypass(item);
     res.status(200).send("OK\n");
 
   }
 
   static postCancelArming(req:express.Request, res:express.Response):void {
-    if (service.Service.instance.armedStates.prev == null) {
+    if (di.service.armedStates.prev == null) {
       res.status(400).send("no prev armed state");
       return;
     }
 
-    if (service.Service.instance.armedStates.active.timeLeft == 0) {
+    if (di.service.armedStates.active.timeLeft == 0) {
       res.status(400).send("already armed");
       return;
     }
@@ -574,7 +562,7 @@ export class WebService {
     if (!WebService.checkPinCode(req, res))
       return;
 
-    service.Service.instance.armedStates.prev.activate()
+    di.service.armedStates.prev.activate()
       .then(() => {
         res.status(200).send("OK\n");
       });

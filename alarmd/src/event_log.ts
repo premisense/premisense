@@ -8,10 +8,12 @@ import NeDB = require('nedb')
 import Q = require('q')
 
 import U = require('./u')
-import auth = require('./auth');
-import itemModule = require('./item');
-import serviceModule = require('./service');
-import logging = require('./logging');
+import auth = require('./auth')
+import itemModule = require('./item')
+import serviceModule = require('./service')
+import di = require('./domain_info')
+import logging = require('./logging')
+
 var logger = new logging.Logger(__filename);
 
 
@@ -41,6 +43,7 @@ export class Event {
     return uniqueTime;
   }
 
+  private _id:string;
   private _type:string;
   private _message:string;
   private _severity:Severity;
@@ -49,12 +52,22 @@ export class Event {
   private _data:any;
 
   constructor(o:EventOptions) {
+    this._id = null;
     this._type = o.type;
     this._message = o.message;
     this._severity = o.severity;
-    this._user = U.isNullOrUndefined(o.user) ? serviceModule.Service.instance.users.getAdmin().name : o.user;
+    this._user = U.isNullOrUndefined(o.user) ? di.service.users.getAdmin().name : o.user;
     this._time = o.time || new Date();
     this._data = o.data;
+  }
+
+  get id():string {
+    return this._id;
+  }
+
+  set id(id:string) {
+    assert(U.isNullOrUndefined(this._id));
+    this._id = id;
   }
 
   get type():string {
@@ -91,9 +104,10 @@ export class Event {
 
   toJson():any {
     var ret:any = {
+      '_id': this._id,
       'type': this._type,
       'message': this._message,
-      'time': this._time,
+      'time': Math.floor(this._time.valueOf() / 1000),
       'severity': this._severity,
       'data': this._data,
       'user': this._user
@@ -105,12 +119,14 @@ export class Event {
 export class EventLog extends itemModule.Item {
   modified:number = 0;
   database:NeDB;
+  keepDays:number;
 
-  constructor(filename:string) {
+  constructor(filename:string, eventLogKeepDays:number) {
     super({
       id: "EventLog"
     });
     this.database = new NeDB(filename);
+    this.keepDays = eventLogKeepDays;
   }
 
   toJson():any {
@@ -120,6 +136,37 @@ export class EventLog extends itemModule.Item {
     return ret;
   }
 
+  doCleanup():Q.Promise<boolean> {
+    var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
+
+    var maxTime:number = (new Date().valueOf() / 1000) - this.keepDays * 24 * 60 * 60;
+    var query = {
+      time: {$lt: maxTime}
+    };
+    this.database.remove(query, {multi: true}, (err, numRemoved) => {
+      if (err) {
+        logger.error("cleanup failed. err:", err);
+        deferred.reject(err);
+      } else {
+        logger.info("cleanup completed. removed %d records:", numRemoved);
+        deferred.resolve(true);
+      }
+    });
+    return deferred.promise;
+  }
+
+  rescheduleCleanup():void {
+    var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
+
+    var self = this;
+
+    Q.delay(24 * 60 * 60 * 1000)
+      .then(() => {
+        self.rescheduleCleanup(); // for next time
+
+        self.doCleanup();
+      });
+  }
 
   start():Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
@@ -129,11 +176,17 @@ export class EventLog extends itemModule.Item {
     self.database.loadDatabase((err) => {
       if (err) {
         logger.error("failed to create/open event_log database. error:", err);
-        deferred.resolve(false);
+        deferred.reject(err);
       } else {
 
         self.database.persistence.setAutocompactionInterval(24 * 60 * 60 * 1000);
-        deferred.resolve(true);
+        self.doCleanup()
+          .then((result) => {
+            self.rescheduleCleanup();
+            deferred.resolve(true);
+          }, (err) => {
+            deferred.reject(err);
+          });
       }
     });
 
@@ -145,26 +198,44 @@ export class EventLog extends itemModule.Item {
 
     var self = this;
 
-    var doc = {
-      time: Event.getUniqueTime(event.time),
-      type: event.type,
-      message: event.message,
-      severity: event.severity,
-      user: event.user,
-      data: event.data
-    };
+    var id = event.id;
 
-    self.database.insert(doc, (err) => {
-      if (err) {
-        logger.error("failed to insert event_log record to database. error:", err);
-        deferred.reject(false);
-      } else {
-        itemModule.transaction(() => {
-          self.modified += 1;
-        });
-        deferred.resolve(true);
-      }
-    });
+    if (U.isNullOrUndefined(event.id)) {
+      event.id = Event.getUniqueTime(event.time).toString();
+
+      var doc = event.toJson();
+
+      self.database.insert(doc, (err) => {
+        if (err) {
+          logger.error("failed to insert event_log record to database. error:", err);
+          deferred.reject(false);
+        } else {
+          itemModule.transaction(() => {
+            self.modified += 1;
+          });
+          deferred.resolve(true);
+        }
+      });
+
+    } else {
+      var doc = event.toJson();
+
+      self.database.update({_id: event.id}, doc, {}, (err, numReplaced, upsert) => {
+        if (err) {
+          logger.error("failed to update event_log record to database. error:", err);
+          deferred.reject(false);
+        } else {
+          itemModule.transaction(() => {
+            self.modified += 1;
+          });
+          deferred.resolve(true);
+        }
+      });
+
+    }
+
+
+
 
     return deferred.promise;
   }
@@ -185,7 +256,7 @@ export class EventLog extends itemModule.Item {
             message: doc.message,
             severity: doc.severity,
             user: doc.user,
-            time: doc.time,
+            time: new Date(doc.time * 1000),
             data: doc.data
           });
           events.push(event);

@@ -9,9 +9,8 @@ var Q = require('q');
 var _ = require('lodash');
 var U = require('./u');
 var itemModule = require('./item');
-var service = require('./service');
 var event_log = require('./event_log');
-var domain_info = require('./domain_info');
+var di = require('./domain_info');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 var Group = itemModule.Group;
@@ -141,10 +140,10 @@ var ArmedState = (function (_super) {
         return deferred.promise;
     };
     ArmedState.prototype.isActive = function () {
-        return service.Service.instance.armedStates.active == this;
+        return di.service.armedStates.active == this;
     };
     ArmedState.prototype.activate = function () {
-        return service.Service.instance.armedStates.activate(this);
+        return di.service.armedStates.activate(this);
     };
     ArmedState.prototype.bypass = function (item) {
         var _this = this;
@@ -164,7 +163,7 @@ var ArmedState = (function (_super) {
     };
     ArmedState.prototype.updateLogEvent = function () {
         var deferred = Q.defer();
-        var userName = domain_info.DomainInfo.active.user.name;
+        var userName = di.user.name;
         var persist = false;
         if (_.isNull(ArmedState.logEvent)) {
             persist = true;
@@ -202,7 +201,7 @@ var ArmedState = (function (_super) {
             persist = true;
         }
         if (persist) {
-            service.Service.instance.eventLog.log(ArmedState.logEvent).then(function () {
+            di.service.eventLog.log(ArmedState.logEvent).then(function () {
                 deferred.resolve(true);
             });
         }

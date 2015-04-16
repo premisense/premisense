@@ -6,6 +6,7 @@ import assert = require('assert')
 import _ = require('lodash')
 
 import U = require('./u')
+import di = require('./domain_info')
 import ruleEngineModule = require('./rule_engine')
 import serviceModule = require('./service')
 import itemModule = require('./item')
@@ -18,11 +19,11 @@ var logger = new logging.Logger(__filename);
 
 //---------------------------------------------------------------------------------------------------------------------
 class Arm extends ruleEngineModule.Rule {
-  prev:arming.ArmedState = serviceModule.Service.instance.armedStates.active;
+  prev:arming.ArmedState = di.service.armedStates.active;
   armedDetected:itemModule.Item[];
 
   run():void {
-    this.prev = serviceModule.Service.instance.armedStates.active;
+    this.prev = di.service.armedStates.active;
     this.armedDetected = _.filter(this.prev.allItems, (item) => item instanceof itemModule.Sensor && item.isDetected());
   }
 }
@@ -30,19 +31,19 @@ ruleEngineModule.defineRule({ruleClass: Arm.prototype, depends: ['ArmedStates']}
 //---------------------------------------------------------------------------------------------------------------------
 class ArmHistory extends ruleEngineModule.Rule {
 
-  armedState:arming.ArmedState = serviceModule.Service.instance.armedStates.active;
+  armedState:arming.ArmedState = di.service.armedStates.active;
   prevDetected = {};
   arm:Arm = this.getRule(Arm.prototype);
 
   shouldRun():boolean {
-    return super.shouldRun() && serviceModule.Service.instance.armedStates.active.timeLeft == 0;
+    return super.shouldRun() && di.service.armedStates.active.timeLeft == 0;
   }
 
   run():void {
     var now = new Date();
 
-    if (serviceModule.Service.instance.armedStates.active != this.armedState) {
-      this.armedState = serviceModule.Service.instance.armedStates.active;
+    if (di.service.armedStates.active != this.armedState) {
+      this.armedState = di.service.armedStates.active;
       this.prevDetected = {};
     }
 
@@ -83,20 +84,20 @@ ruleEngineModule.defineRule({ruleClass: ArmHistory.prototype, depends: ['ArmedSt
 //---------------------------------------------------------------------------------------------------------------------
 class WouldTrigger extends ruleEngineModule.Rule {
 
-  armedState:arming.ArmedState = serviceModule.Service.instance.armedStates.active;
+  armedState:arming.ArmedState = di.service.armedStates.active;
   notified:{[key:string]:boolean} = {};
   arm:Arm = this.getRule(Arm.prototype);
 
   shouldRun():boolean {
     return super.shouldRun() && (
-      serviceModule.Service.instance.armedStates.active.timeLeft > 0 ||
-      serviceModule.Service.instance.armedStates.active != this.armedState) ||
-      Object.keys(serviceModule.Service.instance.armedStates.active.wouldTriggerItems).length > 0;
+      di.service.armedStates.active.timeLeft > 0 ||
+      di.service.armedStates.active != this.armedState) ||
+      Object.keys(di.service.armedStates.active.wouldTriggerItems).length > 0;
   }
 
   run():void {
-    if (serviceModule.Service.instance.armedStates.active != this.armedState) {
-      this.armedState = serviceModule.Service.instance.armedStates.active;
+    if (di.service.armedStates.active != this.armedState) {
+      this.armedState = di.service.armedStates.active;
       this.notified = {};
     }
 
@@ -112,7 +113,7 @@ class WouldTrigger extends ruleEngineModule.Rule {
     _.forEach(this.arm.armedDetected, (item) => {
       if (this.armedState.bypassedItems[item.id])
         return;
-      if (serviceModule.Service.instance.items.delayedArmed.at(item.id))
+      if (di.service.items.delayedArmed.at(item.id))
         return;
 
       if (!this.notified[item.id]) {
@@ -151,18 +152,18 @@ class NotifyMonitor extends ruleEngineModule.Rule {
   prevDetectedString:string = '';
 
   shouldRun():boolean {
-    return super.shouldRun() && !U.isNullOrUndefined(serviceModule.Service.instance.pushNotification);
+    return super.shouldRun() && !U.isNullOrUndefined(di.service.pushNotification);
   }
 
   run():void {
-    var detected = _.filter(serviceModule.Service.instance.items.monitor.allItems, (item) => item instanceof itemModule.Sensor && item.isDetected());
+    var detected = _.filter(di.service.items.monitor.allItems, (item) => item instanceof itemModule.Sensor && item.isDetected());
 
     if (detected.length == 0)
       return;
     var detectedString = detected.map((item) => item.id).join(',');
     if (detectedString != this.prevDetectedString) {
       this.prevDetectedString = detectedString;
-      serviceModule.Service.instance.pushNotification.send(new push_notification.Message({
+      di.service.pushNotification.send(new push_notification.Message({
         title: "Monitor Sensors Detected",
         body: detectedString,
         priority: push_notification.Priority.HIGH
@@ -174,19 +175,19 @@ ruleEngineModule.defineRule({ruleClass: NotifyMonitor.prototype, depends: ['moni
 
 //---------------------------------------------------------------------------------------------------------------------
 class ActivateSiren extends ruleEngineModule.Rule {
-  armedState:arming.ArmedState = serviceModule.Service.instance.armedStates.active;
+  armedState:arming.ArmedState = di.service.armedStates.active;
   notified:{[key:string]:boolean} = {};
   arm:Arm = this.getRule(Arm.prototype);
   prevTimeLeftToNextState:number = 0;
 
   activateSiren():void {
-    serviceModule.Service.instance.siren.activate();
+    di.service.siren.activate();
     this.armedState.lastSiren = new Date();
     this.armedState.notifyChanged();
   }
 
   checkDispatchNotification():void {
-    if (!serviceModule.Service.instance.siren.isActive())
+    if (!di.service.siren.isActive())
       return;
 
     var toNotify = {};
@@ -207,9 +208,9 @@ class ActivateSiren extends ruleEngineModule.Rule {
       toNotify[item.id] = true;
     }, this);
 
-    if (Object.keys(toNotify).length > 0 && serviceModule.Service.instance.pushNotification != null) {
+    if (Object.keys(toNotify).length > 0 && di.service.pushNotification != null) {
       //TODO change priority to CRITICAL (after debugging)
-      serviceModule.Service.instance.pushNotification.send(new push_notification.Message({
+      di.service.pushNotification.send(new push_notification.Message({
         title: "Siren !!!",
         body: util.format("Sensors: %s", Object.keys(toNotify).join('\n')),
         priority: push_notification.Priority.HIGH
@@ -219,19 +220,19 @@ class ActivateSiren extends ruleEngineModule.Rule {
   }
 
   run():void {
-    if (serviceModule.Service.instance.armedStates.active != this.armedState) {
-      this.armedState = serviceModule.Service.instance.armedStates.active;
+    if (di.service.armedStates.active != this.armedState) {
+      this.armedState = di.service.armedStates.active;
       this.notified = {};
       this.prevTimeLeftToNextState = 0;
-      serviceModule.Service.instance.siren.deactivate();
+      di.service.siren.deactivate();
     }
 
-    if (serviceModule.Service.instance.siren.timeLeftToNextState > 0)
-      this.prevTimeLeftToNextState = serviceModule.Service.instance.siren.timeLeftToNextState;
+    if (di.service.siren.timeLeftToNextState > 0)
+      this.prevTimeLeftToNextState = di.service.siren.timeLeftToNextState;
     else if (this.prevTimeLeftToNextState > 0) {
       this.prevTimeLeftToNextState = 0;
-      if (serviceModule.Service.instance.siren.isActive())
-        serviceModule.Service.instance.siren.deactivate();
+      if (di.service.siren.isActive())
+        di.service.siren.deactivate();
       else
         this.activateSiren();
       return;
@@ -239,7 +240,7 @@ class ActivateSiren extends ruleEngineModule.Rule {
 
     this.checkDispatchNotification();
 
-    if (serviceModule.Service.instance.siren.isActive())
+    if (di.service.siren.isActive())
       return;
 
     var delayedSensors = {};
@@ -251,7 +252,7 @@ class ActivateSiren extends ruleEngineModule.Rule {
 
       _.forEach(this.arm.armedDetected, (item) => {
         if (!this.armedState.bypassedItems[item.id]) {
-          if (serviceModule.Service.instance.items.delayedSiren.containsItem(item))
+          if (di.service.items.delayedSiren.containsItem(item))
             delayedSensors[item.id] = true;
           else
             nonDelayedSensors[item.id] = true;
@@ -262,9 +263,9 @@ class ActivateSiren extends ruleEngineModule.Rule {
         logger.info("Activating Siren now. sensors: %s", _.union(Object.keys(nonDelayedSensors), Object.keys(delayedSensors)).join('\n'));
         this.activateSiren();
       }
-      else if (Object.keys(delayedSensors).length > 0 && serviceModule.Service.instance.siren.timeLeftToNextState == 0) {
+      else if (Object.keys(delayedSensors).length > 0 && di.service.siren.timeLeftToNextState == 0) {
         logger.info("Activating Siren in %s, sensors: %s", this.armedState.sirenDelay, Object.keys(delayedSensors).join('\n'));
-        serviceModule.Service.instance.siren.scheduleActivate(this.armedState.sirenDelay);
+        di.service.siren.scheduleActivate(this.armedState.sirenDelay);
       }
     }
   }
@@ -279,14 +280,14 @@ class SensorHistory extends ruleEngineModule.Rule {
     var now = new Date();
     var slot = Math.floor(now.getTime() / 1000 / 300) * 300;
 
-    var detected = _.filter(serviceModule.Service.instance.items.all.allItems, (item) => item instanceof itemModule.Sensor && item.isDetected());
+    var detected = _.filter(di.service.items.all.allItems, (item) => item instanceof itemModule.Sensor && item.isDetected());
     var oldPrevDetected = this.prevDetected;
     this.prevDetected = {};
 
     _.forEach(detected, (item) => {
       if (!oldPrevDetected[item.id]) {
         this.prevDetected[item.id] = true;
-        serviceModule.Service.instance.sensorHistory.add(slot, item.id);
+        di.service.sensorHistory.add(slot, item.id);
       }
     }, this);
   }

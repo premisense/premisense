@@ -21,9 +21,11 @@ export class ItemHistory {
 export class SensorHistory {
   history:{[key:string]: ItemHistory} = {};
   database:NeDB;
+  keepDays:number;
 
-  constructor(filename:string) {
+  constructor(filename:string, sensorHistoryKeepDays:number) {
     this.database = new NeDB(filename);
+    this.keepDays = sensorHistoryKeepDays;
   }
 
   private persist():void {
@@ -86,6 +88,38 @@ export class SensorHistory {
       });
   }
 
+  doCleanup():Q.Promise<boolean> {
+    var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
+
+    var maxTime:number = (new Date().valueOf() / 1000) - this.keepDays * 24 * 60 * 60;
+    var query = {
+      time: {$lt: maxTime}
+    };
+    this.database.remove(query, {multi: true}, (err, numRemoved) => {
+      if (err) {
+        logger.error("cleanup failed. err:", err);
+        deferred.reject(err);
+      } else {
+        logger.info("cleanup completed. removed %d records:", numRemoved);
+        deferred.resolve(true);
+      }
+    });
+    return deferred.promise;
+  }
+
+  rescheduleCleanup():void {
+    var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
+
+    var self = this;
+
+    Q.delay(24 * 60 * 60 * 1000)
+      .then(() => {
+        self.rescheduleCleanup(); // for next time
+
+        self.doCleanup();
+      });
+  }
+
 
   start():Q.Promise<boolean> {
     var deferred:Q.Deferred<boolean> = Q.defer<boolean>();
@@ -95,11 +129,17 @@ export class SensorHistory {
     self.database.loadDatabase((err) => {
       if (err) {
         logger.error("failed to create/open sensor_history database. error:", err);
-        deferred.resolve(false);
+        deferred.reject(err);
       } else {
         self.database.persistence.setAutocompactionInterval(24 * 60 * 60 * 1000);
-        self.reschedulePersist();
-        deferred.resolve(true);
+        self.doCleanup()
+          .then((result) => {
+            self.rescheduleCleanup();
+            self.reschedulePersist();
+            deferred.resolve(true);
+          }, (err) => {
+            deferred.reject(err);
+          });
       }
     });
 

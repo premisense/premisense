@@ -8,6 +8,7 @@ import _ = require('lodash')
 
 import U = require('./u')
 import itemModule = require('./item')
+import di = require('./domain_info')
 import service = require('./service')
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
@@ -71,7 +72,7 @@ export class Rule extends itemModule.Item {
   }
 
   getRule<T>(t:T):T {
-    return service.Service.instance.ruleEngine.getRule(t);
+    return di.service.ruleEngine.getRule(t);
   }
 
   toJson():any {

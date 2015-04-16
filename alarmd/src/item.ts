@@ -7,6 +7,7 @@ import _ = require('lodash')
 import mqtt = require('mqtt')
 
 import U = require('./u')
+import di = require('./domain_info')
 import logging = require('./logging');
 var logger = new logging.Logger(__filename);
 
@@ -245,7 +246,7 @@ export class Item extends EventEmitter {
     this._minor = !U.isNullOrUndefined(o.minor) ? o.minor === true : false;
     this.metadata = o.metadata || null;
 
-    ItemEvents.instance.addItem(this);
+    di.itemEvents.addItem(this);
 
     if (o.groups) {
       for (var i in o.groups) {
@@ -316,7 +317,7 @@ export class Item extends EventEmitter {
     //ensure that we are still the latest
     assert(this._syncPoint.value === SyncPoint.currentValue);
 
-    ItemEvents.instance.handleEvent(event);
+    di.itemEvents.handleEvent(event);
     this.emit("event", event);
     this._notifyChangeParents(event);
   }
@@ -721,12 +722,6 @@ export class Siren extends Item {
 }
 
 export class ItemEvents {
-  private static _instance:ItemEvents = new ItemEvents ();
-
-  static get instance():ItemEvents {
-    return ItemEvents._instance;
-  }
-
   private ring:ItemEvent[] = [];
   private _lastReceived:SyncPoint = SyncPoint.zero;
   private _items:{[key:string]:Item} = {};

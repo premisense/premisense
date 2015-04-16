@@ -12,9 +12,10 @@ var ItemHistory = (function () {
 })();
 exports.ItemHistory = ItemHistory;
 var SensorHistory = (function () {
-    function SensorHistory(filename) {
+    function SensorHistory(filename, sensorHistoryKeepDays) {
         this.history = {};
         this.database = new NeDB(filename);
+        this.keepDays = sensorHistoryKeepDays;
     }
     SensorHistory.prototype.persist = function () {
         var _this = this;
@@ -66,18 +67,49 @@ var SensorHistory = (function () {
             self.persist();
         });
     };
+    SensorHistory.prototype.doCleanup = function () {
+        var deferred = Q.defer();
+        var maxTime = (new Date().valueOf() / 1000) - this.keepDays * 24 * 60 * 60;
+        var query = {
+            time: { $lt: maxTime }
+        };
+        this.database.remove(query, { multi: true }, function (err, numRemoved) {
+            if (err) {
+                logger.error("cleanup failed. err:", err);
+                deferred.reject(err);
+            }
+            else {
+                logger.info("cleanup completed. removed %d records:", numRemoved);
+                deferred.resolve(true);
+            }
+        });
+        return deferred.promise;
+    };
+    SensorHistory.prototype.rescheduleCleanup = function () {
+        var deferred = Q.defer();
+        var self = this;
+        Q.delay(24 * 60 * 60 * 1000).then(function () {
+            self.rescheduleCleanup(); // for next time
+            self.doCleanup();
+        });
+    };
     SensorHistory.prototype.start = function () {
         var deferred = Q.defer();
         var self = this;
         self.database.loadDatabase(function (err) {
             if (err) {
                 logger.error("failed to create/open sensor_history database. error:", err);
-                deferred.resolve(false);
+                deferred.reject(err);
             }
             else {
                 self.database.persistence.setAutocompactionInterval(24 * 60 * 60 * 1000);
-                self.reschedulePersist();
-                deferred.resolve(true);
+                self.doCleanup().then(function (result) {
+                    self.rescheduleCleanup();
+                    self.reschedulePersist();
+                    deferred.resolve(true);
+                }, function (err) {
+                    deferred.reject(err);
+                });
             }
         });
         return deferred.promise;

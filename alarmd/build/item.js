@@ -11,6 +11,7 @@ var assert = require('assert');
 var through = require('through');
 var _ = require('lodash');
 var U = require('./u');
+var di = require('./domain_info');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 var EventEmitter = eventsModule.EventEmitter;
@@ -203,7 +204,7 @@ var Item = (function (_super) {
         this._disabled = !U.isNullOrUndefined(o.disabled) ? o.disabled === true : false;
         this._minor = !U.isNullOrUndefined(o.minor) ? o.minor === true : false;
         this.metadata = o.metadata || null;
-        ItemEvents.instance.addItem(this);
+        di.itemEvents.addItem(this);
         if (o.groups) {
             for (var i in o.groups) {
                 var g = o.groups[i];
@@ -282,7 +283,7 @@ var Item = (function (_super) {
         var event = this.newEvent(originator);
         //ensure that we are still the latest
         assert(this._syncPoint.value === SyncPoint.currentValue);
-        ItemEvents.instance.handleEvent(event);
+        di.itemEvents.handleEvent(event);
         this.emit("event", event);
         this._notifyChangeParents(event);
     };
@@ -655,13 +656,6 @@ var ItemEvents = (function () {
         this.ringSize = 1000;
         this.activeStreams = [];
     }
-    Object.defineProperty(ItemEvents, "instance", {
-        get: function () {
-            return ItemEvents._instance;
-        },
-        enumerable: true,
-        configurable: true
-    });
     ItemEvents.prototype.addItem = function (item) {
         this._items[item.id] = item;
     };
@@ -747,7 +741,6 @@ var ItemEvents = (function () {
         this.activeStreams.push(strm);
         return strm;
     };
-    ItemEvents._instance = new ItemEvents();
     return ItemEvents;
 })();
 exports.ItemEvents = ItemEvents;
