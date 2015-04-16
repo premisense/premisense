@@ -8,6 +8,7 @@ import fs = require('fs')
 import _ = require('lodash')
 import express = require('express')
 import mqtt = require('mqtt')
+import os = require("os")
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -34,19 +35,13 @@ function configError(msg:string):void {
 }
 
 export class Config {
-  file:string;
   systemItems:serviceModule.SystemItems;
 
-  constructor(file:string) {
-    this.file = file;
+  constructor() {
   }
 
-  private doLoad():serviceModule.Service {
+  private doLoad(configJson:any):serviceModule.Service {
     var self = this;
-
-    //TODO check if file cannot be opened
-    var configJson = JSON.parse(fs.readFileSync(this.file, 'utf8'));
-
 
     //--------------------------------------------------------------------------
     //      collection of all groups
@@ -74,8 +69,9 @@ export class Config {
       configError("missing mqtt options section");
 
 
+    var clientId = 'alarmd:' + os.hostname();
     _.defaults(mqttOptions, {
-      clientId: 'alarmd',
+      clientId: clientId,
       reconnectPeriod: 1000
     });
 
@@ -481,8 +477,7 @@ export class Config {
     return service;
   }
 
-  load():serviceModule.Service {
-
+  loadj(configJson:any):serviceModule.Service {
     var domainInfo = di.create(null);
 
     var self = this;
@@ -491,9 +486,21 @@ export class Config {
     domainInfo.domain.run(()=> {
       domainInfo.itemEvents = new itemModule.ItemEvents();
       self.systemItems = new serviceModule.SystemItems();
-      service = self.doLoad();
+      service = self.doLoad(configJson);
     });
 
     return service;
   }
+
+
+  loads(str:string):serviceModule.Service {
+
+    var configJson = JSON.parse(str);
+    return this.loadj(configJson);
+  }
+
+  loadf(file:string):serviceModule.Service {
+    return this.loads(fs.readFileSync(file, 'utf8'));
+  }
+
 }

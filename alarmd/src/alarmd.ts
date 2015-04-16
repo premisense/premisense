@@ -203,9 +203,8 @@ if (!args['l']) {
 //      load config file
 //--------------------------------------------------------------------------
 
-var cfg:config.Config = new config.Config(args['c']);
-var service:serviceModule.Service = cfg.load();
-
+var cfg:config.Config = new config.Config();
+var service:serviceModule.Service = cfg.loadf(args['c']);
 
 //--------------------------------------------------------------------------
 

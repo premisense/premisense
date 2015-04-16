@@ -153,8 +153,8 @@ else {
 //--------------------------------------------------------------------------
 //      load config file
 //--------------------------------------------------------------------------
-var cfg = new config.Config(args['c']);
-var service = cfg.load();
+var cfg = new config.Config();
+var service = cfg.loadf(args['c']);
 //--------------------------------------------------------------------------
 service.start();
 //# sourceMappingURL=alarmd.js.map

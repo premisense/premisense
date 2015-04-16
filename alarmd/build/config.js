@@ -4,6 +4,7 @@ var fs = require('fs');
 var _ = require('lodash');
 var express = require('express');
 var mqtt = require('mqtt');
+var os = require("os");
 var U = require('./u');
 var itemModule = require('./item');
 var hubModule = require('./hub');
@@ -24,13 +25,10 @@ function configError(msg) {
     process.exit(10);
 }
 var Config = (function () {
-    function Config(file) {
-        this.file = file;
+    function Config() {
     }
-    Config.prototype.doLoad = function () {
+    Config.prototype.doLoad = function (configJson) {
         var self = this;
-        //TODO check if file cannot be opened
-        var configJson = JSON.parse(fs.readFileSync(this.file, 'utf8'));
         //--------------------------------------------------------------------------
         //      collection of all groups
         //--------------------------------------------------------------------------
@@ -51,8 +49,9 @@ var Config = (function () {
         var mqttOptions = configJson['mqtt']['options'];
         if (!mqttOptions)
             configError("missing mqtt options section");
+        var clientId = 'alarmd:' + os.hostname();
         _.defaults(mqttOptions, {
-            clientId: 'alarmd',
+            clientId: clientId,
             reconnectPeriod: 1000
         });
         var mqttClient = mqtt.connect(mqttOptions);
@@ -384,16 +383,23 @@ var Config = (function () {
         });
         return service;
     };
-    Config.prototype.load = function () {
+    Config.prototype.loadj = function (configJson) {
         var domainInfo = di.create(null);
         var self = this;
         var service = null;
         domainInfo.domain.run(function () {
             domainInfo.itemEvents = new itemModule.ItemEvents();
             self.systemItems = new serviceModule.SystemItems();
-            service = self.doLoad();
+            service = self.doLoad(configJson);
         });
         return service;
+    };
+    Config.prototype.loads = function (str) {
+        var configJson = JSON.parse(str);
+        return this.loadj(configJson);
+    };
+    Config.prototype.loadf = function (file) {
+        return this.loads(fs.readFileSync(file, 'utf8'));
     };
     return Config;
 })();
