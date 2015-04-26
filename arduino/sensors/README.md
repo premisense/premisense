@@ -6,7 +6,7 @@
 Parameters
 - PORT=<path to port>: The path to the device port that the arduino is connected to for uploading the compiled program
 - I2C=<0,1-n,-1>: The role of this device in the I2C communication (standalone means no I2C)
-- upload: Upload the program after compilication is done.
+- upload: Upload the program after compilation is done.
 
 ## build and upload an i2c_master package
 make PORT=/dev/ttyUSB<#> I2C=0 upload
