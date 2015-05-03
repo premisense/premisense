@@ -101,13 +101,19 @@ var ArmedState = (function (_super) {
         ret['type'] = 'ArmedState';
         ret['securityLevel'] = this.securityLevel;
         ret['order'] = this.order;
-        ret['startTime'] = (this.startTime == null) ? null : this.startTime.valueOf;
+        ret['startTime'] = (this.startTime == null) ? null : this.startTime.valueOf();
         ret['armingTimeLeft'] = this.timeLeft;
         ret['armingTimeout'] = this.timeout;
-        ret['lastSiren'] = (this.lastSiren == null) ? null : this.lastSiren.valueOf;
-        ret['triggeredItems'] = this.triggeredItems;
-        ret['wouldTriggerItems'] = this.wouldTriggerItems;
-        ret['bypassedItems'] = this.bypassedItems;
+        ret['lastSiren'] = (this.lastSiren == null) ? null : this.lastSiren.valueOf();
+        ret['triggeredItems'] = _.mapValues(this.triggeredItems, function (value, key) {
+            return value.toJson();
+        });
+        ret['wouldTriggerItems'] = _.mapValues(this.wouldTriggerItems, function (value, key) {
+            return value.toJson();
+        });
+        ret['bypassedItems'] = _.mapValues(this.bypassedItems, function (value, key) {
+            return value.toJson();
+        });
         ret['metadata'] = this.metadata;
         return ret;
     };
