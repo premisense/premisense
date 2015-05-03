@@ -1,16 +1,21 @@
 ## README
 
 
-# Build
+# Buildr
+
+Parameters
+- PORT=<path to port>: The path to the device port that the arduino is connected to for uploading the compiled program
+- I2C=<0,1-n,-1>: The role of this device in the I2C communication (standalone means no I2C)
+- upload: Upload the program after compilation is done.
 
 ## build and upload an i2c_master package
-TBD
+make PORT=/dev/ttyUSB<#> I2C=0 upload
 
 ## build and upload an i2c_slave package
-TBD
+make PORT=/dev/ttyUSB<#> I2C=1 upload
 
 ## build and upload a standalone only package
-TBD
+make PORT=/dev/ttyUSB<#> I2C=-1 upload
 
 # Arduino Nano Pin Mapping
 
