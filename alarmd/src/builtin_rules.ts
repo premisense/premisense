@@ -227,8 +227,9 @@ class ActivateSiren extends ruleEngineModule.Rule {
       di.service.siren.deactivate();
     }
 
-    if (di.service.siren.timeLeftToNextState > 0)
-      this.prevTimeLeftToNextState = di.service.siren.timeLeftToNextState;
+    var timeLeftToNextState = di.service.siren.timeLeftToNextState;
+    if (timeLeftToNextState > 0)
+      this.prevTimeLeftToNextState = timeLeftToNextState;
     else if (this.prevTimeLeftToNextState > 0) {
       this.prevTimeLeftToNextState = 0;
       if (di.service.siren.isActive())

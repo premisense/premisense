@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/src/item.ts" line="778" />
+    <bookmark url="file://$PROJECT_DIR$/src/item.ts" line="779" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8dd1a2d-42f1-4e56-89db-e3e47c711cb0" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../alarmt/Gruntfile.js" afterPath="$PROJECT_DIR$/../alarmt/Gruntfile.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/builtin_rules.js.map" afterPath="$PROJECT_DIR$/build/builtin_rules.js.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/builtin_rules.js" afterPath="$PROJECT_DIR$/build/builtin_rules.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/builtin_rules.ts" afterPath="$PROJECT_DIR$/src/builtin_rules.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/item.js.map" afterPath="$PROJECT_DIR$/build/item.js.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/item.js" afterPath="$PROJECT_DIR$/build/item.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/item.ts" afterPath="$PROJECT_DIR$/src/item.ts" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="alarmd.iws" />
@@ -29,11 +34,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="alarmd.ts" pinned="false" current-in-tab="true">
+      <file leaf-file-name="alarmd.ts" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/alarmd.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.19611308">
-              <caret line="178" column="0" selection-start-line="178" selection-start-column="0" selection-end-line="178" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="179" column="29" selection-start-line="179" selection-start-column="29" selection-end-line="179" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -73,7 +78,7 @@
         <entry file="file://$PROJECT_DIR$/src/item.ts">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="167" column="0" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
+              <caret line="623" column="6" selection-start-line="623" selection-start-column="6" selection-end-line="623" selection-end-column="6" />
               <folding />
             </state>
           </provider>
@@ -119,11 +124,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="builtin_rules.ts" pinned="false" current-in-tab="false">
+      <file leaf-file-name="builtin_rules.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/builtin_rules.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-7.148148">
-              <caret line="56" column="0" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.33215547">
+              <caret line="237" column="21" selection-start-line="237" selection-start-column="21" selection-end-line="237" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -195,12 +200,12 @@
         <option value="$PROJECT_DIR$/src/rule_engine.ts" />
         <option value="$PROJECT_DIR$/src/domain_info.ts" />
         <option value="$PROJECT_DIR$/src/service.ts" />
-        <option value="$PROJECT_DIR$/src/item.ts" />
         <option value="$PROJECT_DIR$/src/web_service.ts" />
         <option value="$PROJECT_DIR$/src/config.ts" />
-        <option value="$PROJECT_DIR$/src/builtin_rules.ts" />
         <option value="$PROJECT_DIR$/src/arming.ts" />
         <option value="$PROJECT_DIR$/src/alarmd.ts" />
+        <option value="$PROJECT_DIR$/src/item.ts" />
+        <option value="$PROJECT_DIR$/src/builtin_rules.ts" />
       </list>
     </option>
   </component>
@@ -329,20 +334,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="alarmd" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="alarmd" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="build" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -854,7 +845,7 @@
       <envs />
       <method />
     </configuration>
-    <configuration default="false" name="alarmd" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="/usr/local/bin/node" path-to-js-file="build/alarmd.js" application-parameters="-d -m item:info -m alarmd:info -l &quot;syslog:{\&quot;host\&quot;:\&quot;10.0.0.5\&quot;}&quot; -l console" working-dir="$PROJECT_DIR$">
+    <configuration default="false" name="alarmd" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="/usr/local/bin/node" path-to-js-file="build/alarmd.js" application-parameters="-d -c /tmp/alarmd.conf -m item:info -m alarmd:info -l &quot;syslog:{\&quot;host\&quot;:\&quot;10.0.0.5\&quot;}&quot; -l console" working-dir="$PROJECT_DIR$">
       <RunnerSettings RunnerId="debuggableProgram" />
       <ConfigurationWrapper RunnerId="debuggableProgram" />
       <method />
@@ -927,12 +918,12 @@
       <workItem from="1429202333191" duration="13116000" />
       <workItem from="1429259516850" duration="7447000" />
       <workItem from="1430314378930" duration="233000" />
-      <workItem from="1430634390430" duration="4178000" />
+      <workItem from="1430634390430" duration="7025000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="326411000" />
+    <option name="totallyTimeSpent" value="329258000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1016,7 +1007,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="426" />
+      <option name="time" value="437" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="NodeJSConfigurationType">
@@ -1353,42 +1344,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/domain_info.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="75" column="21" selection-start-line="75" selection-start-column="21" selection-end-line="75" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/service.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="132" column="15" selection-start-line="132" selection-start-column="15" selection-end-line="132" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/builtin_rules.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.148148">
-          <caret line="56" column="0" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/typings/lodash/lodash.d.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="5898" column="17" selection-start-line="5898" selection-start-column="8" selection-end-line="5898" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/item.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="167" column="0" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1411,8 +1370,40 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/alarmd.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.19611308">
-          <caret line="178" column="0" selection-start-line="178" selection-start-column="0" selection-end-line="178" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="179" column="29" selection-start-line="179" selection-start-column="29" selection-end-line="179" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/domain_info.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="75" column="21" selection-start-line="75" selection-start-column="21" selection-end-line="75" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/service.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="132" column="15" selection-start-line="132" selection-start-column="15" selection-end-line="132" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/item.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="623" column="6" selection-start-line="623" selection-start-column="6" selection-end-line="623" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/builtin_rules.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33215547">
+          <caret line="237" column="21" selection-start-line="237" selection-start-column="21" selection-end-line="237" selection-end-column="21" />
           <folding />
         </state>
       </provider>

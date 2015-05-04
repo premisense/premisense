@@ -634,12 +634,13 @@ export class Siren extends Item {
 
 
   _checkNotifyChangedTimeLeft():void {
+    var self = this;
     if (this.timeLeftToNextState > 0) {
       setTimeout(() => {
         transaction(() => {
-          this.notifyChanged();
-        }, this);
-        this._checkNotifyChangedTimeLeft();
+          self.notifyChanged();
+        }, self);
+        self._checkNotifyChangedTimeLeft();
       }, 500);
     }
   }

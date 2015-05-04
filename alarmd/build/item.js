@@ -571,13 +571,13 @@ var Siren = (function (_super) {
         configurable: true
     });
     Siren.prototype._checkNotifyChangedTimeLeft = function () {
-        var _this = this;
+        var self = this;
         if (this.timeLeftToNextState > 0) {
             setTimeout(function () {
                 transaction(function () {
-                    _this.notifyChanged();
-                }, _this);
-                _this._checkNotifyChangedTimeLeft();
+                    self.notifyChanged();
+                }, self);
+                self._checkNotifyChangedTimeLeft();
             }, 500);
         }
     };
