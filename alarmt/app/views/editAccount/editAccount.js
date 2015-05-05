@@ -34,8 +34,8 @@ angular.module('alarmt.editAccountView', ['ui.bootstrap'])
                         .success(function (response, status) {
                             if (response === "OK\n") {
                                 console.log("serverAddressValidator succeeded");
-                                s.editAccountForm.userName.$validate();
-                                s.editAccountForm.password.$validate();
+                                //s.editAccountForm.userName.$validate();
+                                //s.editAccountForm.password.$validate();
                                 def.resolve ();
                             } else {
                                 console.log("serverAddressValidator failed: response:" + response);
@@ -55,14 +55,29 @@ angular.module('alarmt.editAccountView', ['ui.bootstrap'])
         return {
             require: 'ngModel',
             link: function (scope, element, attrs, ngModel) {
+                var serverAddress;
+                var password;
+
+                attrs.$observe('serverAddress', function(value) {
+                    serverAddress = value;
+                    ngModel.$validate();
+                });
+
+                attrs.$observe('password', function(value) {
+                    password = value;
+                    ngModel.$validate();
+                });
+
                 ngModel.$asyncValidators.loginValidator = function (modelValue, viewValue) {
                     var s = scope;
                     var def = $q.defer();
 
+                    var userName = viewValue; //s.editAccountForm.userName.$viewValue
+
                     $http
-                        .get(s.editAccountForm.serverAddress.$viewValue + '/login', {
+                        .get(serverAddress + '/login', {
                             headers: {
-                                'Authorization': 'Basic ' + btoa(s.editAccountForm.userName.$viewValue + ':' + s.editAccountForm.password.$viewValue)
+                                'Authorization': 'Basic ' + btoa(userName + ':' + password)
                             },
                             timeout: 2000
                         })

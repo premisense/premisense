@@ -22,8 +22,7 @@
                     <label class="control-label" for="serverAddress">Server Address</label>
                     <input name="serverAddress" type="url" autofocus class="form-control" id="serverAddress"
                            ng-model="serverAddress"
-                           placeholder="Server Address..." required server-address-validator />
-                    </label>
+                           placeholder="Server Address..." required server-address-validator>
                     <span ng-show="editAccountForm.serverAddress.$pending.serverAddressValidator">Connecting to server ...</span>
                     <span ng-show="editAccountForm.serverAddress.$error.serverAddressValidator">Connect failed !!!</span>
                 </div>
@@ -32,7 +31,7 @@
                     <label class="control-label" for="userName">User Name</label>
                     <input name="userName" type="text" autofocus class="form-control" id="userName"
                            ng-model="userName"
-                           placeholder="Username..." required login-validator>
+                           placeholder="Username..." server-address="{{serverAddress}}" password="{{password}}" required login-validator>
                     <span ng-show="editAccountForm.userName.$pending.loginValidator">Checking login ...</span>
                     <span ng-show="editAccountForm.userName.$error.loginValidator">Login failed !!!</span>
                 </div>
@@ -41,7 +40,7 @@
                     <label class="control-label" for="password">password</label>
                     <input name="password" type="password" class="form-control" id="password"
                            ng-model="password"
-                           placeholder="Password..." required login-validator>
+                           placeholder="Password..." required>
                     <span ng-show="editAccountForm.password.$pending.loginValidator">Checking login ...</span>
                     <span ng-show="editAccountForm.password.$error.loginValidator">Login failed !!!</span>
                 </div>

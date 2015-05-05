@@ -87,18 +87,24 @@ angular.module('alarmt', [
 
 
         if ((typeof(HomeKiosk) != 'undefined')) {
-            appInfo.kiosk = {
-                origUrl: HomeKiosk.getOrigUrl(),
-                playSound: function (url) {
-                    HomeKiosk.playSound(url);
-                },
-                stopSound: function (url) {
-                    HomeKiosk.stopSound(url);
-                }
+            appInfo.playSound = function (url) {
+                HomeKiosk.playSound(url);
+            };
+            appInfo.stopSound = function (url) {
+                HomeKiosk.stopSound(url);
+            };
 
+            appInfo.kiosk = {
+                OrigUrl: HomeKiosk.getOrigUrl()
             };
             origUrl = appInfo.kiosk.origUrl;
         } else {
+            appInfo.playSound = function (url) {
+                $log.debug('playing sound: %s', url);
+            };
+            appInfo.stopSound = function (url) {
+                $log.debug('stopping sound: %s', url);
+            };
             origUrl = $window.location.href;
         }
 
@@ -155,28 +161,26 @@ angular.module('alarmt', [
             $scope.armedState = angular.isDefined(aservice.session) ? aservice.session.events.armedStates.active : null;
             $scope.sirenState = angular.isDefined(aservice.session) ? aservice.session.events.sirenState : null;
 
-            if (angular.isDefined(appInfo.kiosk)) {
-                var play = null;
+            var play = null;
 
-                if ($scope.armedState !== null &&
-                    $scope.armedState.armingTimeLeft > 0 &&
-                    $scope.armedState.metadata !== null) {
-                    var armingSound = $scope.armedState.metadata.armingSound;
-                    if (armingSound !== null) {
-                        play = appInfo.baseUrl + armingSound;
-                    }
+            if ($scope.armedState !== null &&
+                $scope.armedState.armingTimeLeft > 0 &&
+                $scope.armedState.metadata !== null) {
+                var armingSound = $scope.armedState.metadata.armingSound;
+                if (armingSound !== null) {
+                    play = appInfo.baseUrl + armingSound;
                 }
+            }
 
-                if ($scope.activeSound != play) {
-                    if (play !== null) {
+            if ($scope.activeSound != play) {
+                if (play !== null) {
 //                            $log.debug("playing sound: "+play);
-                        appInfo.kiosk.playSound(play);
-                    } else {
+                    appInfo.playSound(play);
+                } else {
 //                            $log.debug("stopping sound:" + $scope.activeSound);
-                        appInfo.kiosk.stopSound($scope.activeSound);
-                    }
-                    $scope.activeSound = play;
+                    appInfo.stopSound($scope.activeSound);
                 }
+                $scope.activeSound = play;
             }
         };
 

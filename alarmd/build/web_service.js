@@ -9,6 +9,7 @@ var Q = require('q');
 var compression = require('compression');
 var morgan = require('morgan');
 var split = require('split');
+var cors = require('cors');
 var U = require('./u');
 var itemModule = require('./item');
 var di = require('./domain_info');
@@ -25,7 +26,7 @@ var WebService = (function () {
         var morganLogger = morgan(logFormat, {
             stream: logStream
         });
-        this.app.use(morganLogger).use(WebService.domainWrapper).use(WebService.bodyReader).use(compression()).get('/', WebService.home).get('/login', WebService.authFilter, WebService.apiFilter, WebService.login).get('/events', WebService.authFilter, WebService.apiFilter, WebService.getEvents).post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState).post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor).post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming).get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory).get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog);
+        this.app.use(morganLogger).use(cors()).use(WebService.domainWrapper).use(WebService.bodyReader).use(compression()).get('/', WebService.home).get('/login', WebService.authFilter, WebService.apiFilter, WebService.login).get('/events', WebService.authFilter, WebService.apiFilter, WebService.getEvents).post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState).post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor).post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming).get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory).get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog);
     }
     WebService.getProto = function (req) {
         var fwdProto = req.header('x-forwarded-proto');

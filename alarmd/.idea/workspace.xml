@@ -5,12 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8dd1a2d-42f1-4e56-89db-e3e47c711cb0" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/builtin_rules.js.map" afterPath="$PROJECT_DIR$/build/builtin_rules.js.map" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/builtin_rules.js" afterPath="$PROJECT_DIR$/build/builtin_rules.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/builtin_rules.ts" afterPath="$PROJECT_DIR$/src/builtin_rules.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/item.js.map" afterPath="$PROJECT_DIR$/build/item.js.map" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/item.js" afterPath="$PROJECT_DIR$/build/item.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/item.ts" afterPath="$PROJECT_DIR$/src/item.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../alarmt/Gruntfile.js" afterPath="$PROJECT_DIR$/../alarmt/Gruntfile.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../alarmt/app/scripts/app.js" afterPath="$PROJECT_DIR$/../alarmt/app/scripts/app.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../alarmt/app/views/editAccount/editAccount.html" afterPath="$PROJECT_DIR$/../alarmt/app/views/editAccount/editAccount.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../alarmt/app/views/editAccount/editAccount.js" afterPath="$PROJECT_DIR$/../alarmt/app/views/editAccount/editAccount.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/externals.d.ts" afterPath="$PROJECT_DIR$/src/externals.d.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/web_service.js.map" afterPath="$PROJECT_DIR$/build/web_service.js.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/web_service.js" afterPath="$PROJECT_DIR$/build/web_service.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/web_service.ts" afterPath="$PROJECT_DIR$/src/web_service.ts" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="alarmd.iws" />
@@ -54,16 +57,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sensor_history.ts" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/sensor_history.ts">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="14" column="43" selection-start-line="14" selection-start-column="43" selection-end-line="14" selection-end-column="43" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="service.ts" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/service.ts">
           <provider selected="true" editor-type-id="text-editor">
@@ -84,31 +77,41 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="arming.ts" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/arming.ts">
+      <file leaf-file-name="package.json" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/package.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="125" column="16" selection-start-line="125" selection-start-column="16" selection-end-line="125" selection-end-column="16" />
+            <state vertical-scroll-proportion="-6.25">
+              <caret line="14" column="23" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="lodash.d.ts" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/typings/lodash/lodash.d.ts">
+      <file leaf-file-name="web_service.ts" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/web_service.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="5898" column="17" selection-start-line="5898" selection-start-column="8" selection-end-line="5898" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.19964664">
+              <caret line="152" column="44" selection-start-line="152" selection-start-column="44" selection-end-line="152" selection-end-column="44" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="hub.ts" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/hub.ts">
+      <file leaf-file-name="externals.d.ts" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/externals.d.ts">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+              <caret line="40" column="26" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="26" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="yargs.d.ts" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/typings/yargs/yargs.d.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="114" column="0" selection-start-line="114" selection-start-column="0" selection-end-line="114" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -124,11 +127,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="builtin_rules.ts" pinned="false" current-in-tab="true">
+      <file leaf-file-name="builtin_rules.ts" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/builtin_rules.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.33215547">
-              <caret line="237" column="21" selection-start-line="237" selection-start-column="21" selection-end-line="237" selection-end-column="21" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="240" column="0" selection-start-line="240" selection-start-column="0" selection-end-line="240" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -191,21 +194,21 @@
         <option value="$PROJECT_DIR$/examples/alarmd.conf" />
         <option value="$PROJECT_DIR$/src/db.ts" />
         <option value="$PROJECT_DIR$/build/push_notification.js" />
-        <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/src/logging.ts" />
-        <option value="$PROJECT_DIR$/src/externals.d.ts" />
         <option value="$PROJECT_DIR$/src/push_notification.ts" />
         <option value="$PROJECT_DIR$/src/sensor_history.ts" />
         <option value="$PROJECT_DIR$/src/event_log.ts" />
         <option value="$PROJECT_DIR$/src/rule_engine.ts" />
         <option value="$PROJECT_DIR$/src/domain_info.ts" />
         <option value="$PROJECT_DIR$/src/service.ts" />
-        <option value="$PROJECT_DIR$/src/web_service.ts" />
         <option value="$PROJECT_DIR$/src/config.ts" />
         <option value="$PROJECT_DIR$/src/arming.ts" />
         <option value="$PROJECT_DIR$/src/alarmd.ts" />
         <option value="$PROJECT_DIR$/src/item.ts" />
         <option value="$PROJECT_DIR$/src/builtin_rules.ts" />
+        <option value="$PROJECT_DIR$/package.json" />
+        <option value="$PROJECT_DIR$/src/externals.d.ts" />
+        <option value="$PROJECT_DIR$/src/web_service.ts" />
       </list>
     </option>
   </component>
@@ -354,7 +357,7 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="settings.editor.selected.configurable" value="settings.typescriptcompiler" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../alarmt" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../alarm_system/HomeKiosk" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="editor.config.accepted" value="true" />
     <property name="recentsLimit" value="5" />
@@ -918,12 +921,12 @@
       <workItem from="1429202333191" duration="13116000" />
       <workItem from="1429259516850" duration="7447000" />
       <workItem from="1430314378930" duration="233000" />
-      <workItem from="1430634390430" duration="7025000" />
+      <workItem from="1430634390430" duration="16099000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="329258000" />
+    <option name="totallyTimeSpent" value="338332000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1007,7 +1010,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="437" />
+      <option name="time" value="438" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="NodeJSConfigurationType">
@@ -1259,20 +1262,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/externals.d.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="40" selection-start-line="12" selection-start-column="40" selection-end-line="12" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/typings/yargs/yargs.d.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="114" column="2" selection-start-line="114" selection-start-column="2" selection-end-line="114" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/auth.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1288,26 +1277,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/web_service.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="305" column="53" selection-start-line="305" selection-start-column="53" selection-end-line="305" selection-end-column="53" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/config.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.125">
-          <caret line="5" column="28" selection-start-line="5" selection-start-column="28" selection-end-line="5" selection-end-column="28" />
           <folding />
         </state>
       </provider>
@@ -1402,8 +1375,40 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/builtin_rules.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33215547">
-          <caret line="237" column="21" selection-start-line="237" selection-start-column="21" selection-end-line="237" selection-end-column="21" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="240" column="0" selection-start-line="240" selection-start-column="0" selection-end-line="240" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.25">
+          <caret line="14" column="23" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/typings/yargs/yargs.d.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="114" column="0" selection-start-line="114" selection-start-column="0" selection-end-line="114" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/externals.d.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="40" column="26" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/web_service.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.19964664">
+          <caret line="152" column="44" selection-start-line="152" selection-start-column="44" selection-end-line="152" selection-end-column="44" />
           <folding />
         </state>
       </provider>

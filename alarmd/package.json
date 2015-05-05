@@ -22,7 +22,8 @@
     "request": "*",
     "winston": "*",
     "winston-syslog": "*",
-    "morgan": "*"
+    "morgan": "*",
+    "cors": "*"
   },
 
   "devDependencies": {

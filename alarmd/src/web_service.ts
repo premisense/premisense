@@ -13,6 +13,7 @@ import domain = require('domain')
 import morgan = require('morgan')
 import stream = require('stream')
 import split = require('split')
+import cors = require('cors')
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -61,6 +62,7 @@ export class WebService {
 
     this.app
       .use(morganLogger)
+      .use(cors())
       .use(WebService.domainWrapper)
       .use(WebService.bodyReader)
       .use(compression())

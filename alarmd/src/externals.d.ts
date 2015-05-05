@@ -34,3 +34,13 @@ declare module "winston-syslog" {
     constructor(options: any);
   }
 }
+
+declare module "cors" {
+  module Cors {
+    interface Interface {
+      (...args:any[]):any;
+    }
+  }
+  var cors: Cors.Interface;
+  export = cors;
+}
