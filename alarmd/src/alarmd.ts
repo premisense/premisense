@@ -10,6 +10,7 @@ import winston = require('winston');
 import winston_syslog = require('winston-syslog')
 import os = require('os')
 import Q = require('q')
+var daemon = require('daemon');
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -78,6 +79,11 @@ var args:{[key:string]: any } = yargs
       demand: false,
       describe: 'debug logging'
     })
+    .option('b', {
+      alias: 'background',
+      demand: false,
+      describe: 'daemon mode'
+    })
     .option('l', {
       alias: 'log',
       demand: false,
@@ -94,6 +100,12 @@ var args:{[key:string]: any } = yargs
       demand: false,
       'default': '/etc/alarmd.conf',
       describe: 'config file',
+      type: 'string'
+    })
+    .option('p', {
+      alias: 'pidfile',
+      demand: false,
+      describe: 'create pid file',
       type: 'string'
     })
     .strict()
@@ -207,5 +219,13 @@ var cfg:config.Config = new config.Config();
 var service:serviceModule.Service = cfg.loadf(args['c']);
 
 //--------------------------------------------------------------------------
+
+if (args['b']) {
+  daemon();
+}
+
+if (args['p']) {
+  fs.writeFileSync(args['p'], process.pid.toString());
+}
 
 service.start();

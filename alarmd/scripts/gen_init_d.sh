@@ -41,6 +41,7 @@ DAEMON="$NODE_PATH"
 [ -f /etc/default/alarmd ] && . /etc/default/alarmd
 
 DAEMON_OPTS+=("-c" "\$CONF")
+DAEMON_OPTS+=("-p" "\${PIDFILE}")
 
 # /etc/init.d/alarmd: start and stop the alarmd daemon
 
@@ -64,7 +65,7 @@ case "\$1" in
 	    exit 1
 	fi
 	log_daemon_msg "Starting daemon:" "alarmd"
-	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --background  --make-pidfile --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js \${DAEMON_OPTS[@]} ; then
+	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
 	    log_end_msg 0
 	else
 	    log_end_msg 1
@@ -91,7 +92,7 @@ case "\$1" in
 	if start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile \${PIDFILE}; then
 	    rm -f \${PIDFILE}
 	fi
-	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --background --make-pidfile --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js \${DAEMON_OPTS[@]} ; then
+	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
 	    log_end_msg 0
 	else
 	    log_end_msg 1
@@ -111,7 +112,7 @@ case "\$1" in
 	    0)
 		# old daemon stopped
 		rm -f \${PIDFILE}
-		if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --background --make-pidfile --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js \${DAEMON_OPTS[@]} ; then
+		if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
 		    log_end_msg 0
 		else
 		    log_end_msg 1

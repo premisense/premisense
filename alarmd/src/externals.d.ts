@@ -44,3 +44,14 @@ declare module "cors" {
   var cors: Cors.Interface;
   export = cors;
 }
+
+declare module "daemon" {
+  module Daemon {
+    interface Interface {
+      (...args:any[]):any;
+    }
+  }
+  var daemon: Daemon.Interface;
+  export = daemon;
+}
+

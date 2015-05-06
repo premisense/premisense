@@ -16,6 +16,7 @@
     "winston": "*",
     "serial": "*",
     "serialport": "*",
+    "daemon": "*",
     "winston-syslog": "*"
   },
 

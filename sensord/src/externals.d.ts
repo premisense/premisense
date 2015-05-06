@@ -42,6 +42,16 @@ declare module "winston-syslog" {
   }
 }
 
+declare module "daemon" {
+  module Daemon {
+    interface Interface {
+      (...args:any[]):any;
+    }
+  }
+  var daemon: Daemon.Interface;
+  export = daemon;
+}
+
 /*
 declare module "winston" {
   function log(level: string, message: string, metadata?: any);

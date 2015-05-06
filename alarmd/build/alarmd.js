@@ -5,6 +5,7 @@ var yargs = require('yargs');
 var _ = require('lodash');
 var winston = require('winston');
 var winston_syslog = require('winston-syslog');
+var daemon = require('daemon');
 var U = require('./u');
 var hubModule = require('./hub');
 var config = require('./config');
@@ -47,6 +48,10 @@ var args = yargs.usage("Usage: $0 -c config [options]").help('h').alias('h', 'he
     alias: 'debug',
     demand: false,
     describe: 'debug logging'
+}).option('b', {
+    alias: 'background',
+    demand: false,
+    describe: 'daemon mode'
 }).option('l', {
     alias: 'log',
     demand: false,
@@ -61,6 +66,11 @@ var args = yargs.usage("Usage: $0 -c config [options]").help('h').alias('h', 'he
     demand: false,
     'default': '/etc/alarmd.conf',
     describe: 'config file',
+    type: 'string'
+}).option('p', {
+    alias: 'pidfile',
+    demand: false,
+    describe: 'create pid file',
     type: 'string'
 }).strict().parse(process.argv);
 if (args['m']) {
@@ -156,5 +166,11 @@ else {
 var cfg = new config.Config();
 var service = cfg.loadf(args['c']);
 //--------------------------------------------------------------------------
+if (args['b']) {
+    daemon();
+}
+if (args['p']) {
+    fs.writeFileSync(args['p'], process.pid.toString());
+}
 service.start();
 //# sourceMappingURL=alarmd.js.map

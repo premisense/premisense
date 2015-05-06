@@ -1,15 +1,14 @@
 var _this = this;
-var mqtt = require('mqtt');
 var Q = require('q');
 var fs = require('fs');
 var tty = require('tty');
-var util = require('util');
 var yargs = require('yargs');
 var winston = require('winston');
 var winston_syslog = require('winston-syslog');
 var _ = require('lodash');
+var daemon = require('daemon');
 var U = require('./u');
-var gatewayModule = require('./gateway');
+var config = require('./config');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 // the below exposes the Syslog transport
@@ -45,6 +44,10 @@ var args = yargs.usage("Usage: $0 -f config [options]").help('h').alias('h', 'he
     alias: 'debug',
     demand: false,
     describe: 'debug logging'
+}).option('b', {
+    alias: 'background',
+    demand: false,
+    describe: 'daemon mode'
 }).option('l', {
     alias: 'log',
     demand: false,
@@ -55,6 +58,11 @@ var args = yargs.usage("Usage: $0 -f config [options]").help('h').alias('h', 'he
     demand: false,
     'default': '/etc/sensord.conf',
     describe: 'config file',
+    type: 'string'
+}).option('p', {
+    alias: 'pidfile',
+    demand: false,
+    describe: 'create pid file',
     type: 'string'
 }).strict().parse(process.argv);
 var cliError = function (msg) {
@@ -128,60 +136,22 @@ else {
 //--------------------------------------------------------------------------
 //      load config file
 //--------------------------------------------------------------------------
-var configJson = JSON.parse(fs.readFileSync(args['c'], 'utf8'));
-var configError = function (msg) {
-    console.error("config error: " + msg);
-    process.exit(10);
-};
+var cfg = new config.Config();
+cfg.loadf(args['c']);
 //--------------------------------------------------------------------------
-//      load mqtt settings
+if (args['b']) {
+    daemon();
+}
 //--------------------------------------------------------------------------
-logger.debug(util.format("loading mqtt settings"));
-if (!configJson['mqtt'])
-    configError("missing mqtt section");
-var mqttOptions = configJson['mqtt']['options'];
-if (!mqttOptions)
-    configError("missing mqtt options section");
-var mqttClient = mqtt.connect(mqttOptions);
-//--------------------------------------------------------------------------
-//      load gateway list
-//--------------------------------------------------------------------------
-logger.debug(util.format("loading gateways"));
-var gateways = [];
-if (!configJson['gateways'])
-    configError("missing gateways section");
-_.forEach(configJson['gateways'], function (v, k) {
-    logger.debug(util.format("loading gateway: %s", k));
-    var gatewayType = v['type'];
-    if (gatewayType === "ArduinoSerialGateway") {
-        var devices = [];
-        _.forEach(v['devices'], function (deviceConfig, deviceId) {
-            var deviceInitString = deviceConfig['initString'];
-            if (U.isNullOrUndefined(deviceInitString))
-                deviceInitString = "";
-            var device = new gatewayModule.ArduinoDevice(deviceId, deviceInitString);
-            devices.push(device);
-        });
-        var initString = v['initString'];
-        if (U.isNullOrUndefined(initString))
-            configError(util.format("missing or invalid initString format. gateway %s", k));
-        var serialPort = v['serialPort'];
-        if (U.isNullOrUndefined(serialPort) || serialPort.toString().length === 0)
-            configError(util.format("missing or invalid serialPort. gateway %s", k));
-        var remoteSSH = v['remoteSSH'];
-        var gateway = new gatewayModule.ArduinoSerialGateway(mqttClient, "", k, devices, serialPort, initString, remoteSSH);
-        gateways.push(gateway);
-    }
-    else {
-        configError(util.format("unknown or missing gateway type for gateway %s", k));
-    }
-});
+if (args['p']) {
+    fs.writeFileSync(args['p'], process.pid.toString());
+}
 //--------------------------------------------------------------------------
 logger.debug("waiting for mqtt connection");
-mqttClient.once('connect', function () {
+cfg.mqttClient.once('connect', function () {
     logger.debug("connected to mqtt. starting gateways...");
     var startGateways = [];
-    _.forEach(gateways, function (gw) {
+    _.forEach(cfg.gateways, function (gw) {
         startGateways.push(gw.start());
     }, _this);
     Q.allSettled(startGateways).then(function () {
