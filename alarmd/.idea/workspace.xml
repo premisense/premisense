@@ -5,17 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8dd1a2d-42f1-4e56-89db-e3e47c711cb0" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/alarmd.js.map" afterPath="$PROJECT_DIR$/build/alarmd.js.map" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/alarmd.js" afterPath="$PROJECT_DIR$/build/alarmd.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/alarmd.ts" afterPath="$PROJECT_DIR$/src/alarmd.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/externals.d.ts" afterPath="$PROJECT_DIR$/src/externals.d.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/src/externals.d.ts" afterPath="$PROJECT_DIR$/../sensord/src/externals.d.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/gen_init_d.sh" afterPath="$PROJECT_DIR$/scripts/gen_init_d.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/package.json" afterPath="$PROJECT_DIR$/../sensord/package.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/build/sensord.js.map" afterPath="$PROJECT_DIR$/../sensord/build/sensord.js.map" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/build/sensord.js" afterPath="$PROJECT_DIR$/../sensord/build/sensord.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/src/sensord.ts" afterPath="$PROJECT_DIR$/../sensord/src/sensord.ts" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../sensord/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../sensord/.idea/workspace.xml" />
     </list>
@@ -43,8 +32,8 @@
       <file leaf-file-name="alarmd.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/alarmd.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.81448764">
-              <caret line="226" column="16" selection-start-line="226" selection-start-column="16" selection-end-line="226" selection-end-column="16" />
+            <state vertical-scroll-proportion="0.72170687">
+              <caret line="190" column="17" selection-start-line="190" selection-start-column="17" selection-end-line="190" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -94,7 +83,7 @@
         <entry file="file://$PROJECT_DIR$/src/config.ts">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="31" column="20" selection-start-line="31" selection-start-column="20" selection-end-line="31" selection-end-column="20" />
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -925,12 +914,12 @@
       <workItem from="1429259516850" duration="7447000" />
       <workItem from="1430314378930" duration="233000" />
       <workItem from="1430634390430" duration="19194000" />
-      <workItem from="1430901276165" duration="2051000" />
+      <workItem from="1430901276165" duration="2853000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="343478000" />
+    <option name="totallyTimeSpent" value="344280000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1393,14 +1382,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/config.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="20" selection-start-line="31" selection-start-column="20" selection-end-line="31" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/externals.d.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1409,10 +1390,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/config.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/alarmd.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.81448764">
-          <caret line="226" column="16" selection-start-line="226" selection-start-column="16" selection-end-line="226" selection-end-column="16" />
+        <state vertical-scroll-proportion="0.72170687">
+          <caret line="190" column="17" selection-start-line="190" selection-start-column="17" selection-end-line="190" selection-end-column="17" />
           <folding />
         </state>
       </provider>
