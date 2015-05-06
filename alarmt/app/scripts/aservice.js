@@ -170,7 +170,7 @@ aserviceModule
                             delete event.triggeredItems[k];
                         }
                     }
-                } else if (event.type == "SirenState") {
+                } else if (event.type == "Siren") {
                     this.sirenState = event;
                 } else if (event.type == "EventLog") {
                     this.eventLog = event;

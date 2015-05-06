@@ -28,8 +28,7 @@ angular.module('alarmt', [
             if (!angular.isDefined($rootScope.watchSize)) {
                 var w = angular.element($window);
 
-                $rootScope.watchSize = {
-                };
+                $rootScope.watchSize = {};
 
                 scope.$watch(function () {
                     return {
@@ -87,10 +86,10 @@ angular.module('alarmt', [
 
 
         if ((typeof(HomeKiosk) != 'undefined')) {
-            appInfo.playSound = function (url) {
+            appInfo._playSound = function (url) {
                 HomeKiosk.playSound(url);
             };
-            appInfo.stopSound = function (url) {
+            appInfo._stopSound = function (url) {
                 HomeKiosk.stopSound(url);
             };
 
@@ -99,14 +98,24 @@ angular.module('alarmt', [
             };
             origUrl = appInfo.kiosk.origUrl;
         } else {
-            appInfo.playSound = function (url) {
-                $log.debug('playing sound: %s', url);
+            appInfo._playSound = function (url) {
+
             };
-            appInfo.stopSound = function (url) {
-                $log.debug('stopping sound: %s', url);
+            appInfo._stopSound = function (url) {
+
             };
             origUrl = $window.location.href;
         }
+
+        appInfo.playSound = function (url) {
+            $log.debug("playing sound: "+url);
+            this._playSound(url);
+
+        };
+        appInfo.stopSound = function (url) {
+            $log.debug("stopping sound:" + url);
+            this._stopSound(url);
+        };
 
         var tmp = origUrl.substr($window.location.protocol.length + 2);
         tmp = tmp.substr(0, tmp.indexOf('/'));
@@ -161,23 +170,48 @@ angular.module('alarmt', [
             $scope.armedState = angular.isDefined(aservice.session) ? aservice.session.events.armedStates.active : null;
             $scope.sirenState = angular.isDefined(aservice.session) ? aservice.session.events.sirenState : null;
 
-            var play = null;
+            var play;
 
-            if ($scope.armedState !== null &&
+
+            if (!angular.isDefined(play) &&
+                $scope.sirenState !== null &&
+                $scope.sirenState.active &&
+                $scope.armedState !== null &&
+                $scope.armedState.metadata !== null) {
+
+                var sirenSound = $scope.armedState.metadata.sirenSound;
+                if (angular.isDefined(sirenSound) && sirenSound !== null) {
+                    play = sirenSound;
+                }
+            }
+
+            if (!angular.isDefined(play) &&
+                $scope.sirenState !== null &&
+                !$scope.sirenState.active &&
+                $scope.sirenState.timeLeft > 0 &&
+                $scope.armedState !== null &&
+                $scope.armedState.metadata !== null) {
+
+                var warningSound = $scope.armedState.metadata.warningSound;
+                if (angular.isDefined(warningSound) && warningSound !== null) {
+                    play = warningSound;
+                }
+            }
+
+            if (!angular.isDefined(play) &&
+                $scope.armedState !== null &&
                 $scope.armedState.armingTimeLeft > 0 &&
                 $scope.armedState.metadata !== null) {
                 var armingSound = $scope.armedState.metadata.armingSound;
-                if (armingSound !== null) {
-                    play = appInfo.baseUrl + armingSound;
+                if (angular.isDefined(armingSound) && armingSound !== null) {
+                    play = armingSound;
                 }
             }
 
             if ($scope.activeSound != play) {
-                if (play !== null) {
-//                            $log.debug("playing sound: "+play);
+                if (angular.isDefined(play) && play !== null) {
                     appInfo.playSound(play);
                 } else {
-//                            $log.debug("stopping sound:" + $scope.activeSound);
                     appInfo.stopSound($scope.activeSound);
                 }
                 $scope.activeSound = play;
