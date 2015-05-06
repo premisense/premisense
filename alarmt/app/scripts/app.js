@@ -124,7 +124,16 @@ angular.module('alarmt', [
             this._playSound(url, volume);
 
         };
-        appInfo.stopSound = function (url) {
+        appInfo.stopSound = function (urlOrObject) {
+            var url;
+
+            if (angular.isString(urlOrObject)) {
+                url = urlOrObject;
+            } else {
+                url = urlOrObject.url;
+            }
+
+
             $log.debug("stopping sound:" + url);
             this._stopSound(url);
         };
