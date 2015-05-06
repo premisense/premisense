@@ -86,8 +86,8 @@ angular.module('alarmt', [
 
 
         if ((typeof(HomeKiosk) != 'undefined')) {
-            appInfo._playSound = function (url) {
-                HomeKiosk.playSound(url);
+            appInfo._playSound = function (url, volume) {
+                HomeKiosk.playSound(url, volume);
             };
             appInfo._stopSound = function (url) {
                 HomeKiosk.stopSound(url);
@@ -98,7 +98,7 @@ angular.module('alarmt', [
             };
             origUrl = appInfo.kiosk.origUrl;
         } else {
-            appInfo._playSound = function (url) {
+            appInfo._playSound = function (url, volume) {
 
             };
             appInfo._stopSound = function (url) {
@@ -107,9 +107,21 @@ angular.module('alarmt', [
             origUrl = $window.location.href;
         }
 
-        appInfo.playSound = function (url) {
-            $log.debug("playing sound: "+url);
-            this._playSound(url);
+        appInfo.playSound = function (urlOrObject) {
+            var url;
+            var volume;
+
+            if (angular.isString(urlOrObject)) {
+                url = urlOrObject;
+                volume = 1.0;
+            } else {
+                url = urlOrObject.url;
+                volume = urlOrObject.volume || 1.0;
+            }
+
+
+            $log.debug("playing sound: "+url + ", volume: " + volume);
+            this._playSound(url, volume);
 
         };
         appInfo.stopSound = function (url) {
