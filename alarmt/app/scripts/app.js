@@ -94,7 +94,7 @@ angular.module('alarmt', [
             };
 
             appInfo.kiosk = {
-                OrigUrl: HomeKiosk.getOrigUrl()
+                origUrl: HomeKiosk.getOrigUrl()
             };
             origUrl = appInfo.kiosk.origUrl;
         } else {

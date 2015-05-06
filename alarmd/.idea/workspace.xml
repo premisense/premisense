@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="e8dd1a2d-42f1-4e56-89db-e3e47c711cb0" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../alarmt/app/scripts/app.js" afterPath="$PROJECT_DIR$/../alarmt/app/scripts/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../alarmt/app/scripts/aservice.js" afterPath="$PROJECT_DIR$/../alarmt/app/scripts/aservice.js" />
     </list>
     <ignored path="alarmd.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -913,12 +912,12 @@
       <workItem from="1429202333191" duration="13116000" />
       <workItem from="1429259516850" duration="7447000" />
       <workItem from="1430314378930" duration="233000" />
-      <workItem from="1430634390430" duration="18009000" />
+      <workItem from="1430634390430" duration="18608000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="340242000" />
+    <option name="totallyTimeSpent" value="340841000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
