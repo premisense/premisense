@@ -1,0 +1,26 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/out/src/logging.js" />
+        <item url="file://$PROJECT_DIR$/out/src/u.js" />
+        <item url="file://$PROJECT_DIR$/out/src/bootstrap.js" />
+        <item url="file://$PROJECT_DIR$/out/src/app.js" />
+        <item url="file://$PROJECT_DIR$/out/src/gateway.js" />
+        <item url="file://$PROJECT_DIR$/out/src/sensord.js" />
+        <item url="file://$PROJECT_DIR$/out/src/config.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/out/src/logging.js" />
+      <root url="file://$PROJECT_DIR$/out/src/bootstrap.js" />
+      <root url="file://$PROJECT_DIR$/out/src/u.js" />
+      <root url="file://$PROJECT_DIR$/out/src/app.js" />
+      <root url="file://$PROJECT_DIR$/out/src/gateway.js" />
+      <root url="file://$PROJECT_DIR$/out/src/sensord.js" />
+      <root url="file://$PROJECT_DIR$/out/src/config.js" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

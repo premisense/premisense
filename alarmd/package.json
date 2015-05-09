@@ -2,43 +2,39 @@
   "name": "alarmd",
   "version": "0.0.0",
   "author": "",
-
   "main": "build/alarmd.js",
-
   "dependencies": {
-    "through": "*",
-    "mqtt": "*",
-    "nedb" : "*",
-    "q": "*",
-    "split": "*",
-    "moment": "*",
-    "compression": "*",
-    "express": "*",
-    "serve-static": "*",
-    "form-data": "*",
-    "lodash": "*",
-    "websocket": "*",
-    "yargs": "*",
-    "request": "*",
-    "winston": "*",
-    "winston-syslog": "*",
-    "daemon": "*",
-    "morgan": "*",
-    "cors": "*"
+    "compression": "^1.4.3",
+    "cors": "^2.6.0",
+    "daemon": "^1.1.0",
+    "express": "^4.12.3",
+    "form-data": "^0.2.0",
+    "lodash": "^3.8.0",
+    "moment": "^2.10.2",
+    "morgan": "^1.5.2",
+    "mqtt": "^1.1.3",
+    "nedb": "^1.1.2",
+    "request": "^2.55.0",
+    "serve-static": "^1.9.2",
+    "split": "^0.3.3",
+    "through": "^2.3.7",
+    "traceur": "0.0.89",
+    "websocket": "^1.0.18",
+    "winston": "^1.0.0",
+    "winston-syslog": "^1.1.0",
+    "yargs": "^3.8.0"
   },
-
   "devDependencies": {
     "gulp": "^3.6.2",
-    "gulp-tsc": "^0.9.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-mocha": "^2.0.1",
     "gulp-shell": "^0.2.5",
-    "gulp-clean": "*",
-    "gulp-mocha": "*",
-    "run-sequence":"^0.3.6",
-    "mocha" : "*"
+    "gulp-traceur": "^0.17.1",
+    "mocha": "^2.2.4",
+    "run-sequence": "^0.3.6"
   },
-
-  "scripts" : {
-    "main" : "gulp buildrun",
+  "scripts": {
+    "main": "gulp buildrun",
     "test": "mocha",
     "build": "gulp build"
   }
