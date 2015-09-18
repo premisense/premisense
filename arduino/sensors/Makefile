@@ -3,6 +3,8 @@ ifeq "${PORT}" ""
 $(error missing PORT param e.g. PORT=/dev/ttyUSB1)
 endif
 
+I2C?=-1
+
 ifeq "${I2C}" ""
 $(error missing I2C param e.g. I2C=number. 0-for master mode -1-to disable i2c)
 endif
