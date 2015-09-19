@@ -524,6 +524,7 @@ export class WebService {
     var armedState = <arming.ArmedState> di.service.armedStates.at(req.body);
     if (armedState == null) {
       res.status(400).send("no such armed state");
+      return;
     }
 
     if (!WebService.checkPinCode(req, res))

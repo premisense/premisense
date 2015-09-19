@@ -1,8 +1,7 @@
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 ///<reference path="externals.d.ts"/>
 var util = require('util');
@@ -91,7 +90,8 @@ var Rule = (function (_super) {
     Rule.prototype.reschedule = function (ms) {
         var deferred = Q.defer();
         var self = this;
-        Q.delay(ms).then(function () {
+        Q.delay(ms)
+            .then(function () {
             self._run();
             deferred.resolve(true);
         });
@@ -275,7 +275,8 @@ var RuleEngine = (function (_super) {
         _.forEach(this._rules, function (rule) {
             startRules.push(_this.startRule(rule));
         }, this);
-        Q.allSettled(startRules).then(function () {
+        Q.allSettled(startRules)
+            .then(function () {
             logger.debug("all rules started");
             deferred.resolve(true);
         });

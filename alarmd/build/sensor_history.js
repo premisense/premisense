@@ -62,7 +62,8 @@ var SensorHistory = (function () {
     SensorHistory.prototype.reschedulePersist = function () {
         var deferred = Q.defer();
         var self = this;
-        Q.delay(5 * 60 * 1000).then(function () {
+        Q.delay(5 * 60 * 1000)
+            .then(function () {
             self.reschedulePersist(); // for next time
             self.persist();
         });
@@ -88,7 +89,8 @@ var SensorHistory = (function () {
     SensorHistory.prototype.rescheduleCleanup = function () {
         var deferred = Q.defer();
         var self = this;
-        Q.delay(24 * 60 * 60 * 1000).then(function () {
+        Q.delay(24 * 60 * 60 * 1000)
+            .then(function () {
             self.rescheduleCleanup(); // for next time
             self.doCleanup();
         });
@@ -103,7 +105,8 @@ var SensorHistory = (function () {
             }
             else {
                 self.database.persistence.setAutocompactionInterval(24 * 60 * 60 * 1000);
-                self.doCleanup().then(function (result) {
+                self.doCleanup()
+                    .then(function (result) {
                     self.rescheduleCleanup();
                     self.reschedulePersist();
                     deferred.resolve(true);

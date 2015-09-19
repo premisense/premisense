@@ -305,11 +305,11 @@ var Config = (function () {
                         pushNotificationOptions.defaultTitle = 'alarmd';
                     }
                     if (U.isNullOrUndefined(pushNotificationOptions['defaultPriority'])) {
-                        pushNotificationOptions.defaultPriority = 0 /* NORMAL */;
+                        pushNotificationOptions.defaultPriority = push_notification.Priority.NORMAL;
                     }
                     if (U.isNullOrUndefined(pushNotificationOptions['prioritySoundMap'])) {
                         pushNotificationOptions.prioritySoundMap = {};
-                        push_notification[2 /* CRITICAL */] = 'siren';
+                        push_notification[push_notification.Priority.CRITICAL] = 'siren';
                     }
                     pushNotification = new push_notification.Pushover(pushNotificationOptions);
                 }

@@ -5,10 +5,10 @@ var yargs = require('yargs');
 var _ = require('lodash');
 var winston = require('winston');
 var winston_syslog = require('winston-syslog');
-var daemon = require('daemon');
+//var daemon = require('daemon');
 var U = require('./u');
-var hubModule = require('./hub');
 var config = require('./config');
+var daemonize = require('./daemonize');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 process.on('uncaughtException', function (err) {
@@ -40,39 +40,58 @@ winston.addColors({
 //      define command line parser
 //--------------------------------------------------------------------------
 var packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-var args = yargs.usage("Usage: $0 -c config [options]").help('h').alias('h', 'help').option('v', {
+var args = yargs
+    .usage("Usage: $0 -c config [options]")
+    .help('h')
+    .alias('h', 'help')
+    .option('v', {
     alias: 'version',
     demand: false,
     describe: 'display package version'
-}).option('d', {
+})
+    .option('d', {
     alias: 'debug',
     demand: false,
     describe: 'debug logging'
-}).option('b', {
+})
+    .option('b', {
     alias: 'background',
     demand: false,
     describe: 'daemon mode'
-}).option('l', {
+})
+    .option('l', {
     alias: 'log',
     demand: false,
     describe: 'add (winston) log transport. available transports: console:options | file:options | syslog:options | DailyRotateFile:options',
     type: 'string'
-}).option('m', {
+})
+    .option('m', {
     alias: 'module',
     demand: false,
     describe: 'per module log level. e.g. "-m item:debug"'
-}).option('c', {
+})
+    .option('c', {
     alias: 'config',
     demand: false,
     'default': '/etc/alarmd.conf',
     describe: 'config file',
     type: 'string'
-}).option('p', {
+})
+    .option('p', {
     alias: 'pidfile',
     demand: false,
     describe: 'create pid file',
     type: 'string'
-}).strict().parse(process.argv);
+})
+    .option('g', {
+    alias: 'gc',
+    demand: false,
+    'default': 3600000,
+    describe: 'gc interval',
+    type: 'number'
+})
+    .strict()
+    .parse(process.argv);
 if (args['m']) {
     var logParams = args['m'];
     if (!_.isArray(logParams))
@@ -167,10 +186,16 @@ var cfg = new config.Config();
 var service = cfg.loadf(args['c']);
 //--------------------------------------------------------------------------
 if (args['b']) {
-    daemon();
+    daemonize.daemonize();
 }
 if (args['p']) {
     fs.writeFileSync(args['p'], process.pid.toString());
 }
 service.start();
+if (args['g'] > 0) {
+    global.gc();
+    setInterval(function () {
+        global.gc();
+    }, args['g']);
+}
 //# sourceMappingURL=alarmd.js.map

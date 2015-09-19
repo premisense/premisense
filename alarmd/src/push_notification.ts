@@ -159,7 +159,8 @@ export class Pushover extends PushNotification {
     //});
     var u = "https://api.pushover.net:443/1/messages.json";
 
-    request.post({url:u, formData:params, localAddress:this.localAddress}, (error, response, body) => {
+    var arequest:any = request;
+    arequest.post({url:u, formData:params, localAddress:this.localAddress}, (error, response, body) => {
       if (!error && response.statusCode == 200) {
         logger.info("pushover notification completed. body: ", body);
         deferred.resolve(true);

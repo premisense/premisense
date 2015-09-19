@@ -1,8 +1,7 @@
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var assert = require('assert');
 var Q = require('q');
@@ -78,7 +77,8 @@ var ArmedState = (function (_super) {
     ArmedState.prototype._checkNotifyChangedTimeLeft = function () {
         var self = this;
         if (this.timeLeft > 0) {
-            Q.delay(500).then(function () {
+            Q.delay(500)
+                .then(function () {
                 itemModule.transaction(function () {
                     self.notifyChanged();
                     self._checkNotifyChangedTimeLeft();
@@ -176,7 +176,7 @@ var ArmedState = (function (_super) {
             ArmedState.logEvent = new event_log.Event({
                 type: "arming",
                 message: "armed",
-                severity: 0 /* INFO */,
+                severity: event_log.Severity.INFO,
                 user: userName,
                 data: {}
             });
@@ -194,12 +194,12 @@ var ArmedState = (function (_super) {
         delete newData['active'];
         delete newData['metadata'];
         if (U.isNullOrUndefined(newData['triggeredItems']) && Object.keys(newData['triggeredItems']).length > 0) {
-            ArmedState.logEvent.severity = 3 /* ALERT */;
-            newData['severity'] = 3 /* ALERT */;
+            ArmedState.logEvent.severity = event_log.Severity.ALERT;
+            newData['severity'] = event_log.Severity.ALERT;
         }
         else if (U.isNullOrUndefined(newData['wouldTriggerItems']) && Object.keys(newData['wouldTriggerItems']).length > 0) {
-            ArmedState.logEvent.severity = 1 /* NOTICE */;
-            newData['severity'] = 1 /* NOTICE */;
+            ArmedState.logEvent.severity = event_log.Severity.NOTICE;
+            newData['severity'] = event_log.Severity.NOTICE;
         }
         var newDataStr = JSON.stringify(newData);
         if (newDataStr !== curDataStr) {
@@ -207,7 +207,8 @@ var ArmedState = (function (_super) {
             persist = true;
         }
         if (persist) {
-            di.service.eventLog.log(ArmedState.logEvent).then(function () {
+            di.service.eventLog.log(ArmedState.logEvent)
+                .then(function () {
                 deferred.resolve(true);
             });
         }
@@ -270,7 +271,8 @@ var ArmedStates = (function (_super) {
             deferred.resolve(true);
         }
         else {
-            armedState._activate().then(function () {
+            armedState._activate()
+                .then(function () {
                 itemModule.transaction(function () {
                     _this._prev = _this.active;
                     if (_this.active != null)

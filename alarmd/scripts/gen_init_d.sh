@@ -65,7 +65,7 @@ case "\$1" in
 	    exit 1
 	fi
 	log_daemon_msg "Starting daemon:" "alarmd"
-	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
+	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- --expose-gc build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
 	    log_end_msg 0
 	else
 	    log_end_msg 1
@@ -92,7 +92,7 @@ case "\$1" in
 	if start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile \${PIDFILE}; then
 	    rm -f \${PIDFILE}
 	fi
-	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
+	if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- --expose-gc build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
 	    log_end_msg 0
 	else
 	    log_end_msg 1
@@ -112,7 +112,7 @@ case "\$1" in
 	    0)
 		# old daemon stopped
 		rm -f \${PIDFILE}
-		if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
+		if start-stop-daemon --start --quiet --chdir \$ALARMD_DIR --oknodo --pidfile \${PIDFILE} --exec \${DAEMON} -- --expose-gc build/alarmd.js -b \${DAEMON_OPTS[@]} ; then
 		    log_end_msg 0
 		else
 		    log_end_msg 1

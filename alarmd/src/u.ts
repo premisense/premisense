@@ -2,6 +2,7 @@
 import util = require('util')
 import assert = require('assert')
 import _ = require('lodash')
+import child_process = require('child_process')
 
 
 export function isNOU(v:any):boolean {

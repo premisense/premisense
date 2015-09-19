@@ -19,14 +19,28 @@ var WebService = (function () {
     function WebService(options) {
         this.app = express();
         this.options = options;
-        var logStream = through().pipe(split()).on('data', function (line) {
+        var logStream = through().pipe(split())
+            .on('data', function (line) {
             logger.info(line);
         });
         var logFormat = ':remote-addr :remote-user :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
         var morganLogger = morgan(logFormat, {
             stream: logStream
         });
-        this.app.use(morganLogger).use(cors()).use(WebService.domainWrapper).use(WebService.bodyReader).use(compression()).get('/', WebService.home).get('/login', WebService.authFilter, WebService.apiFilter, WebService.login).get('/events', WebService.authFilter, WebService.apiFilter, WebService.getEvents).post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState).post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor).post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming).get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory).get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog);
+        this.app
+            .use(morganLogger)
+            .use(cors())
+            .use(WebService.domainWrapper)
+            .use(WebService.bodyReader)
+            .use(compression())
+            .get('/', WebService.home)
+            .get('/login', WebService.authFilter, WebService.apiFilter, WebService.login)
+            .get('/events', WebService.authFilter, WebService.apiFilter, WebService.getEvents)
+            .post('/armed_state', WebService.authFilter, WebService.apiFilter, WebService.postArmedState)
+            .post('/bypass_sensor', WebService.authFilter, WebService.apiFilter, WebService.postBypassSensor)
+            .post('/cancel_arming', WebService.authFilter, WebService.apiFilter, WebService.postCancelArming)
+            .get('/sensor_history.json', WebService.authFilter, WebService.apiFilter, WebService.getSensorHistory)
+            .get('/event_log', WebService.authFilter, WebService.apiFilter, WebService.getEventLog);
     }
     WebService.getProto = function (req) {
         var fwdProto = req.header('x-forwarded-proto');
@@ -230,7 +244,8 @@ var WebService = (function () {
             res.status(400).send("no such item");
             return;
         }
-        di.service.sensorHistory.query(itemId).then(function (itemHistory) {
+        di.service.sensorHistory.query(itemId)
+            .then(function (itemHistory) {
             var response = JSON.stringify(itemHistory.history);
             res.status(200).send(response);
         }, function (err) {
@@ -239,8 +254,10 @@ var WebService = (function () {
     };
     WebService.getEventLog = function (req, res) {
         var _this = this;
-        di.service.armedStates.active.updateLogEvent().then(function () {
-            di.service.eventLog.query().then(function (events) {
+        di.service.armedStates.active.updateLogEvent()
+            .then(function () {
+            di.service.eventLog.query()
+                .then(function (events) {
                 var eventsJsons = [];
                 _.forEach(events, function (e) {
                     eventsJsons.push(e.toJson());
@@ -380,10 +397,12 @@ var WebService = (function () {
         var armedState = di.service.armedStates.at(req.body);
         if (armedState == null) {
             res.status(400).send("no such armed state");
+            return;
         }
         if (!WebService.checkPinCode(req, res))
             return;
-        armedState.activate().then(function () {
+        armedState.activate()
+            .then(function () {
             res.status(200).send("OK\n");
         });
     };
@@ -409,7 +428,8 @@ var WebService = (function () {
         }
         if (!WebService.checkPinCode(req, res))
             return;
-        di.service.armedStates.prev.activate().then(function () {
+        di.service.armedStates.prev.activate()
+            .then(function () {
             res.status(200).send("OK\n");
         });
     };

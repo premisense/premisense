@@ -10,7 +10,7 @@ import winston = require('winston');
 import winston_syslog = require('winston-syslog')
 import os = require('os')
 import Q = require('q')
-var daemon = require('daemon');
+//var daemon = require('daemon');
 
 import U = require('./u')
 import itemModule = require('./item')
@@ -23,6 +23,7 @@ import push_notification = require("./push_notification")
 import event_log = require('./event_log')
 import sensor_history = require('./sensor_history')
 import config = require('./config')
+import daemonize = require('./daemonize')
 
 import Hub = hubModule.Hub;
 import MqttHub = hubModule.MqttHub;
@@ -70,44 +71,51 @@ var args:{[key:string]: any } = yargs
     .help('h')
     .alias('h', 'help')
     .option('v', {
-      alias: 'version',
-      demand: false,
-      describe: 'display package version'
-    })
+    alias: 'version',
+    demand: false,
+    describe: 'display package version'
+  })
     .option('d', {
-      alias: 'debug',
-      demand: false,
-      describe: 'debug logging'
-    })
+    alias: 'debug',
+    demand: false,
+    describe: 'debug logging'
+  })
     .option('b', {
-      alias: 'background',
-      demand: false,
-      describe: 'daemon mode'
-    })
+    alias: 'background',
+    demand: false,
+    describe: 'daemon mode'
+  })
     .option('l', {
-      alias: 'log',
-      demand: false,
-      describe: 'add (winston) log transport. available transports: console:options | file:options | syslog:options | DailyRotateFile:options',
-      type: 'string'
-    })
+    alias: 'log',
+    demand: false,
+    describe: 'add (winston) log transport. available transports: console:options | file:options | syslog:options | DailyRotateFile:options',
+    type: 'string'
+  })
     .option('m', {
-      alias: 'module',
-      demand: false,
-      describe: 'per module log level. e.g. "-m item:debug"'
-    })
+    alias: 'module',
+    demand: false,
+    describe: 'per module log level. e.g. "-m item:debug"'
+  })
     .option('c', {
-      alias: 'config',
-      demand: false,
-      'default': '/etc/alarmd.conf',
-      describe: 'config file',
-      type: 'string'
-    })
+    alias: 'config',
+    demand: false,
+    'default': '/etc/alarmd.conf',
+    describe: 'config file',
+    type: 'string'
+  })
     .option('p', {
-      alias: 'pidfile',
-      demand: false,
-      describe: 'create pid file',
-      type: 'string'
-    })
+    alias: 'pidfile',
+    demand: false,
+    describe: 'create pid file',
+    type: 'string'
+  })
+    .option('g', {
+    alias: 'gc',
+    demand: false,
+    'default': 3600000,
+    describe: 'gc interval',
+    type: 'number'
+  })
     .strict()
     .parse(process.argv)
   ;
@@ -149,7 +157,7 @@ var debugLog = (args['d']) ? true : false;
 
 winston.remove(winston.transports.Console);
 
-var appendTransport = (transportType:string, options?:any):boolean =>  {
+var appendTransport = (transportType:string, options?:any):boolean => {
   transportType = transportType.toLowerCase();
 
   if (_.isString(options)) {
@@ -162,7 +170,7 @@ var appendTransport = (transportType:string, options?:any):boolean =>  {
 
   if (transportType === 'console') {
     if (U.isNullOrUndefined(options['colorize'])) {
-      var colorize : boolean = tty.isatty(1);
+      var colorize:boolean = tty.isatty(1);
       options.colorize = colorize;
     }
     winston.add(winston.transports.Console, options);
@@ -202,7 +210,7 @@ if (!args['l']) {
     var transportOptions:any;
     if (pos > 0) {
       transportType = logTransportParam.substr(0, pos);
-      transportOptions = logTransportParam.substr(pos+1);
+      transportOptions = logTransportParam.substr(pos + 1);
     } else {
       transportType = logTransportParam;
     }
@@ -221,7 +229,7 @@ var service:serviceModule.Service = cfg.loadf(args['c']);
 //--------------------------------------------------------------------------
 
 if (args['b']) {
-  daemon();
+  daemonize.daemonize();
 }
 
 if (args['p']) {
@@ -229,3 +237,11 @@ if (args['p']) {
 }
 
 service.start();
+
+if (args['g'] > 0) {
+  global.gc();
+
+  setInterval(() => {
+    global.gc();
+  }, args['g']);
+}

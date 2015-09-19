@@ -1,8 +1,7 @@
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 ///<reference path="externals.d.ts"/>
 var util = require('util');
@@ -86,7 +85,9 @@ var WouldTrigger = (function (_super) {
         this.arm = this.getRule(Arm.prototype);
     }
     WouldTrigger.prototype.shouldRun = function () {
-        return _super.prototype.shouldRun.call(this) && (di.service.armedStates.active.timeLeft > 0 || di.service.armedStates.active != this.armedState) || Object.keys(di.service.armedStates.active.wouldTriggerItems).length > 0;
+        return _super.prototype.shouldRun.call(this) && (di.service.armedStates.active.timeLeft > 0 ||
+            di.service.armedStates.active != this.armedState) ||
+            Object.keys(di.service.armedStates.active.wouldTriggerItems).length > 0;
     };
     WouldTrigger.prototype.run = function () {
         var _this = this;
@@ -149,7 +150,7 @@ var NotifyMonitor = (function (_super) {
             di.service.pushNotification.send(new push_notification.Message({
                 title: "Monitor Sensors Detected",
                 body: detectedString,
-                priority: 1 /* HIGH */
+                priority: push_notification.Priority.HIGH
             }));
         }
     };
@@ -195,7 +196,7 @@ var ActivateSiren = (function (_super) {
             di.service.pushNotification.send(new push_notification.Message({
                 title: "Siren !!!",
                 body: util.format("Sensors: %s", Object.keys(toNotify).join('\n')),
-                priority: 1 /* HIGH */
+                priority: push_notification.Priority.HIGH
             }));
         }
     };

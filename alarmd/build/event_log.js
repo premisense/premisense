@@ -1,8 +1,7 @@
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var assert = require('assert');
 var _ = require('lodash');
@@ -148,7 +147,8 @@ var EventLog = (function (_super) {
     EventLog.prototype.rescheduleCleanup = function () {
         var deferred = Q.defer();
         var self = this;
-        Q.delay(24 * 60 * 60 * 1000).then(function () {
+        Q.delay(24 * 60 * 60 * 1000)
+            .then(function () {
             self.rescheduleCleanup(); // for next time
             self.doCleanup();
         });
@@ -163,7 +163,8 @@ var EventLog = (function (_super) {
             }
             else {
                 self.database.persistence.setAutocompactionInterval(24 * 60 * 60 * 1000);
-                self.doCleanup().then(function (result) {
+                self.doCleanup()
+                    .then(function (result) {
                     self.rescheduleCleanup();
                     deferred.resolve(true);
                 }, function (err) {

@@ -1,8 +1,7 @@
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var request = require('request');
 var Q = require('q');
@@ -101,7 +100,8 @@ var Pushover = (function (_super) {
         //  formData.append(k, v);
         //});
         var u = "https://api.pushover.net:443/1/messages.json";
-        request.post({ url: u, formData: params, localAddress: this.localAddress }, function (error, response, body) {
+        var arequest = request;
+        arequest.post({ url: u, formData: params, localAddress: this.localAddress }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 logger.info("pushover notification completed. body: ", body);
                 deferred.resolve(true);

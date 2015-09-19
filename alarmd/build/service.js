@@ -3,12 +3,7 @@ var assert = require('assert');
 var _ = require('lodash');
 var U = require('./u');
 var itemModule = require('./item');
-var hubModule = require('./hub');
-var arming = require('./arming');
-var web_service = require('./web_service');
-var push_notification = require('./push_notification');
 var event_log = require('./event_log');
-var rule_engine = require('./rule_engine');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
 var Group = itemModule.Group;
@@ -204,35 +199,41 @@ var Service = (function () {
     Service.prototype._start = function (deferred) {
         var _this = this;
         var self = this;
-        this.eventLog.start().then(function (result) {
+        this.eventLog.start()
+            .then(function (result) {
             if (!result) {
                 deferred.resolve(false);
             }
             else {
-                _this.sensorHistory.start().then(function (result) {
+                _this.sensorHistory.start()
+                    .then(function (result) {
                     if (!result) {
                         deferred.resolve(false);
                     }
                     else {
                         logger.info("activating armedState:%s", _this.armedStates.states[0].name);
-                        _this.armedStates.states[0].activate().then(function () {
+                        _this.armedStates.states[0].activate()
+                            .then(function () {
                             var startHubs = [];
                             logger.debug("starting hubs...");
                             _.forEach(self._hubs, function (hub) {
                                 startHubs.push(hub.start());
                             }, self);
-                            Q.allSettled(startHubs).then(function () {
+                            Q.allSettled(startHubs)
+                                .then(function () {
                                 logger.debug("starting rule engine...");
-                                self._ruleEngine.start().then(function () {
+                                self._ruleEngine.start()
+                                    .then(function () {
                                     logger.debug("starting web service...");
-                                    self._webService.start().then(function () {
+                                    self._webService.start()
+                                        .then(function () {
                                         // first run
                                         self._ruleEngine.run();
                                         _this.eventLog.log(new event_log.Event({
                                             type: 'service',
                                             message: 'started',
                                             user: null,
-                                            severity: 0 /* INFO */
+                                            severity: event_log.Severity.INFO
                                         }));
                                         deferred.resolve(true);
                                     });
