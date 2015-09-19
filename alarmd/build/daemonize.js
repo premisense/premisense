@@ -11,7 +11,7 @@ function daemonize(opt) {
     var args = [].concat(process.argv);
     // shift off node
     args.shift();
-    console.log("args", args);
+    //console.log("args", args);
     // our script name
     var script = args.shift();
     var env = opt.env || process.env;
