@@ -1,3 +1,4 @@
+"use strict";
 ///<reference path="externals.d.ts"/>
 var util = require('util');
 var fs = require('fs');
@@ -402,6 +403,6 @@ var Config = (function () {
         return this.loads(fs.readFileSync(file, 'utf8'));
     };
     return Config;
-})();
+}());
 exports.Config = Config;
 //# sourceMappingURL=config.js.map

@@ -1,3 +1,4 @@
+"use strict";
 var _ = require('lodash');
 var NeDB = require('nedb');
 var Q = require('q');
@@ -9,7 +10,7 @@ var ItemHistory = (function () {
         this.history = {};
     }
     return ItemHistory;
-})();
+}());
 exports.ItemHistory = ItemHistory;
 var SensorHistory = (function () {
     function SensorHistory(filename, sensorHistoryKeepDays) {
@@ -154,6 +155,6 @@ var SensorHistory = (function () {
         return deferred.promise;
     };
     return SensorHistory;
-})();
+}());
 exports.SensorHistory = SensorHistory;
 //# sourceMappingURL=sensor_history.js.map

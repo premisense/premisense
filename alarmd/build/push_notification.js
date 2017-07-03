@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -21,7 +22,7 @@ var Message = (function () {
         this.priority = o.priority;
     }
     return Message;
-})();
+}());
 exports.Message = Message;
 var PushNotification = (function () {
     function PushNotification() {
@@ -32,7 +33,7 @@ var PushNotification = (function () {
         return deferred.promise;
     };
     return PushNotification;
-})();
+}());
 exports.PushNotification = PushNotification;
 var PushoverMessage = (function (_super) {
     __extends(PushoverMessage, _super);
@@ -43,7 +44,7 @@ var PushoverMessage = (function (_super) {
         this.sound = o.sound;
     }
     return PushoverMessage;
-})(Message);
+}(Message));
 exports.PushoverMessage = PushoverMessage;
 var Pushover = (function (_super) {
     __extends(Pushover, _super);
@@ -119,6 +120,6 @@ var Pushover = (function (_super) {
         2: 2
     };
     return Pushover;
-})(PushNotification);
+}(PushNotification));
 exports.Pushover = Pushover;
 //# sourceMappingURL=push_notification.js.map

@@ -1,3 +1,4 @@
+"use strict";
 ///<reference path="externals.d.ts"/>
 var util = require('util');
 var path = require('path');
@@ -74,6 +75,6 @@ var Logger = (function () {
         this.logv("error", args);
     };
     return Logger;
-})();
+}());
 exports.Logger = Logger;
 //# sourceMappingURL=logging.js.map

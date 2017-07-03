@@ -1,3 +1,4 @@
+"use strict";
 var Q = require('q');
 var assert = require('assert');
 var _ = require('lodash');
@@ -63,13 +64,13 @@ var SystemItems = (function () {
         configurable: true
     });
     return SystemItems;
-})();
+}());
 exports.SystemItems = SystemItems;
 var ServiceOptions = (function () {
     function ServiceOptions() {
     }
     return ServiceOptions;
-})();
+}());
 exports.ServiceOptions = ServiceOptions;
 var Service = (function () {
     function Service(o) {
@@ -246,6 +247,6 @@ var Service = (function () {
         });
     };
     return Service;
-})();
+}());
 exports.Service = Service;
 //# sourceMappingURL=service.js.map

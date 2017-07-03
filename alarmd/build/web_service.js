@@ -1,3 +1,4 @@
+"use strict";
 ///<reference path="externals.d.ts"/>
 var util = require('util');
 var through = require('through');
@@ -448,6 +449,6 @@ var WebService = (function () {
         return deferred.promise;
     };
     return WebService;
-})();
+}());
 exports.WebService = WebService;
 //# sourceMappingURL=web_service.js.map

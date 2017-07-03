@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -108,7 +109,7 @@ var Event = (function () {
     };
     Event.lastSeq = 0;
     return Event;
-})();
+}());
 exports.Event = Event;
 var EventLog = (function (_super) {
     __extends(EventLog, _super);
@@ -237,6 +238,6 @@ var EventLog = (function (_super) {
         return deferred.promise;
     };
     return EventLog;
-})(itemModule.Item);
+}(itemModule.Item));
 exports.EventLog = EventLog;
 //# sourceMappingURL=event_log.js.map

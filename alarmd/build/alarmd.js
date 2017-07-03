@@ -1,3 +1,4 @@
+"use strict";
 var fs = require('fs');
 var tty = require('tty');
 var util = require('util');

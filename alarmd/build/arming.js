@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -28,7 +29,7 @@ var WouldTriggerItem = (function () {
         };
     };
     return WouldTriggerItem;
-})();
+}());
 exports.WouldTriggerItem = WouldTriggerItem;
 var TriggeredItem = (function () {
     function TriggeredItem(item) {
@@ -44,7 +45,7 @@ var TriggeredItem = (function () {
         };
     };
     return TriggeredItem;
-})();
+}());
 exports.TriggeredItem = TriggeredItem;
 var ArmedState = (function (_super) {
     __extends(ArmedState, _super);
@@ -219,7 +220,7 @@ var ArmedState = (function (_super) {
     };
     ArmedState.logEvent = null;
     return ArmedState;
-})(Group);
+}(Group));
 exports.ArmedState = ArmedState;
 var ArmedStates = (function (_super) {
     __extends(ArmedStates, _super);
@@ -287,6 +288,6 @@ var ArmedStates = (function (_super) {
         return deferred.promise;
     };
     return ArmedStates;
-})(Group);
+}(Group));
 exports.ArmedStates = ArmedStates;
 //# sourceMappingURL=arming.js.map

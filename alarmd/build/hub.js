@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -27,7 +28,7 @@ var Hub = (function () {
         throw "not implemented";
     };
     return Hub;
-})();
+}());
 exports.Hub = Hub;
 var MqttHubDevice = (function () {
     function MqttHubDevice(o) {
@@ -54,7 +55,7 @@ var MqttHubDevice = (function () {
         }
     };
     return MqttHubDevice;
-})();
+}());
 exports.MqttHubDevice = MqttHubDevice;
 var MqttHub = (function (_super) {
     __extends(MqttHub, _super);
@@ -97,6 +98,6 @@ var MqttHub = (function (_super) {
         return deferred.promise;
     };
     return MqttHub;
-})(Hub);
+}(Hub));
 exports.MqttHub = MqttHub;
 //# sourceMappingURL=hub.js.map

@@ -1,3 +1,4 @@
+"use strict";
 var assert = require('assert');
 var _ = require('lodash');
 var domainModule = require('domain');
@@ -116,6 +117,6 @@ var DomainInfo = (function () {
         configurable: true
     });
     return DomainInfo;
-})();
+}());
 module.exports = DomainInfo;
 //# sourceMappingURL=domain_info.js.map

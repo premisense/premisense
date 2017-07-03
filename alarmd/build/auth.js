@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -22,7 +23,7 @@ var UserSession = (function (_super) {
         return ret;
     };
     return UserSession;
-})(itemModule.NumericSensor);
+}(itemModule.NumericSensor));
 exports.UserSession = UserSession;
 var User = (function (_super) {
     __extends(User, _super);
@@ -71,7 +72,7 @@ var User = (function (_super) {
         configurable: true
     });
     return User;
-})(itemModule.Group);
+}(itemModule.Group));
 exports.User = User;
 var Users = (function (_super) {
     __extends(Users, _super);
@@ -138,6 +139,6 @@ var Users = (function (_super) {
         return user;
     };
     return Users;
-})(itemModule.Group);
+}(itemModule.Group));
 exports.Users = Users;
 //# sourceMappingURL=auth.js.map

@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -72,7 +73,7 @@ var SyncPoint = (function () {
     SyncPoint._currentValue = 0;
     SyncPoint._zero = SyncPoint.fromValue(0);
     return SyncPoint;
-})();
+}());
 exports.SyncPoint = SyncPoint;
 var ItemEvent = (function () {
     function ItemEvent(item, syncPoint, json, originator) {
@@ -119,7 +120,7 @@ var ItemEvent = (function () {
         return util.format("item:%s, sp:%d", this.item.id, this.syncPoint.value);
     };
     return ItemEvent;
-})();
+}());
 exports.ItemEvent = ItemEvent;
 var ItemTransaction = (function () {
     function ItemTransaction(item, originator) {
@@ -127,7 +128,7 @@ var ItemTransaction = (function () {
         this.originator = originator;
     }
     return ItemTransaction;
-})();
+}());
 var _GlobalTransaction = (function () {
     function _GlobalTransaction() {
         this.notify = {};
@@ -178,7 +179,7 @@ var _GlobalTransaction = (function () {
     };
     _GlobalTransaction.current = new _GlobalTransaction();
     return _GlobalTransaction;
-})();
+}());
 function transaction(t, thisArg) {
     var cb = _.bind(t, thisArg);
     _GlobalTransaction.current.start();
@@ -305,7 +306,7 @@ var Item = (function (_super) {
         return ret;
     };
     return Item;
-})(EventEmitter);
+}(EventEmitter));
 exports.Item = Item;
 var Nop = (function (_super) {
     __extends(Nop, _super);
@@ -330,7 +331,7 @@ var Nop = (function (_super) {
     };
     Nop._instance = null;
     return Nop;
-})(Item);
+}(Item));
 exports.Nop = Nop;
 var Group = (function (_super) {
     __extends(Group, _super);
@@ -413,7 +414,7 @@ var Group = (function (_super) {
         return ret;
     };
     return Group;
-})(Item);
+}(Item));
 exports.Group = Group;
 var Sensor = (function (_super) {
     __extends(Sensor, _super);
@@ -455,7 +456,7 @@ var Sensor = (function (_super) {
         return ret;
     };
     return Sensor;
-})(Item);
+}(Item));
 exports.Sensor = Sensor;
 var BooleanSensor = (function (_super) {
     __extends(BooleanSensor, _super);
@@ -470,7 +471,7 @@ var BooleanSensor = (function (_super) {
         return this.state === true;
     };
     return BooleanSensor;
-})(Sensor);
+}(Sensor));
 exports.BooleanSensor = BooleanSensor;
 var NumericSensor = (function (_super) {
     __extends(NumericSensor, _super);
@@ -488,7 +489,7 @@ var NumericSensor = (function (_super) {
         return i > 0;
     };
     return NumericSensor;
-})(Sensor);
+}(Sensor));
 exports.NumericSensor = NumericSensor;
 var ArduinoSensor = (function (_super) {
     __extends(ArduinoSensor, _super);
@@ -496,7 +497,7 @@ var ArduinoSensor = (function (_super) {
         _super.call(this, o);
     }
     return ArduinoSensor;
-})(NumericSensor);
+}(NumericSensor));
 exports.ArduinoSensor = ArduinoSensor;
 var ArduinoInputPullupSensor = (function (_super) {
     __extends(ArduinoInputPullupSensor, _super);
@@ -515,7 +516,7 @@ var ArduinoInputPullupSensor = (function (_super) {
         return this.isDetected() ? "ON" : "OFF";
     };
     return ArduinoInputPullupSensor;
-})(ArduinoSensor);
+}(ArduinoSensor));
 exports.ArduinoInputPullupSensor = ArduinoInputPullupSensor;
 var ArduinoInputAnalogSensor = (function (_super) {
     __extends(ArduinoInputAnalogSensor, _super);
@@ -533,7 +534,7 @@ var ArduinoInputAnalogSensor = (function (_super) {
         return this.isDetected() ? "ON" : "OFF";
     };
     return ArduinoInputAnalogSensor;
-})(ArduinoSensor);
+}(ArduinoSensor));
 exports.ArduinoInputAnalogSensor = ArduinoInputAnalogSensor;
 var Siren = (function (_super) {
     __extends(Siren, _super);
@@ -644,7 +645,7 @@ var Siren = (function (_super) {
         this._setActive(false, newTimeLeftToNextState);
     };
     return Siren;
-})(Item);
+}(Item));
 exports.Siren = Siren;
 var ItemEvents = (function () {
     function ItemEvents() {
@@ -741,6 +742,6 @@ var ItemEvents = (function () {
         return strm;
     };
     return ItemEvents;
-})();
+}());
 exports.ItemEvents = ItemEvents;
 //# sourceMappingURL=item.js.map

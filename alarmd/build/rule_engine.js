@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -30,7 +31,7 @@ var RuleDefinition = (function () {
         return this.baseClasses.indexOf(className) >= 0;
     };
     return RuleDefinition;
-})();
+}());
 // the below is to allow self construction of rules (only during RuleEngine init)
 var _currentRuleDefinition = null;
 var Rule = (function (_super) {
@@ -104,7 +105,7 @@ var Rule = (function (_super) {
         throw new Error("not implemented");
     };
     return Rule;
-})(itemModule.Item);
+}(itemModule.Item));
 exports.Rule = Rule;
 var RuleEngine = (function (_super) {
     __extends(RuleEngine, _super);
@@ -290,7 +291,7 @@ var RuleEngine = (function (_super) {
     };
     RuleEngine._current = null;
     return RuleEngine;
-})(itemModule.Group);
+}(itemModule.Group));
 exports.RuleEngine = RuleEngine;
 function defineRule(options) {
     var ruleEngine = RuleEngine._current;

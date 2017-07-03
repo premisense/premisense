@@ -1,3 +1,4 @@
+"use strict";
 var child_process = require('child_process');
 var logging = require('./logging');
 var logger = new logging.Logger(__filename);
