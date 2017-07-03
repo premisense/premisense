@@ -64,8 +64,10 @@ export class Config {
 
       if (gatewayType === "ArduinoSerialGateway") {
 
+
         var disabled = v['disabled'];
         if (!U.isNullOrUndefined(disabled)) {
+          logger.debug(util.format("ignoring device %s", k));
           return;
         }
 

@@ -1,3 +1,4 @@
+"use strict";
 var _ = require('lodash');
 function isNOU(v) {
     return (_.isNull(v) || _.isUndefined(v));

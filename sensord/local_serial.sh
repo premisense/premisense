@@ -29,4 +29,5 @@ then
 	exit 1
 fi
 
+stty -F "$dev" -crtscts ixon ixoff
 exec socat - "$dev,nonblock,raw,echo=0"

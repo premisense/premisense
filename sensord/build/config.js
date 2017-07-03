@@ -1,3 +1,4 @@
+"use strict";
 var mqtt = require('mqtt');
 var fs = require('fs');
 var util = require('util');
@@ -37,6 +38,11 @@ var Config = (function () {
             logger.debug(util.format("loading gateway: %s", k));
             var gatewayType = v['type'];
             if (gatewayType === "ArduinoSerialGateway") {
+                var disabled = v['disabled'];
+                if (!U.isNullOrUndefined(disabled)) {
+                    logger.debug(util.format("ignoring device %s", k));
+                    return;
+                }
                 var devices = [];
                 _.forEach(v['devices'], function (deviceConfig, deviceId) {
                     var deviceInitString = deviceConfig['initString'];
@@ -72,6 +78,6 @@ var Config = (function () {
         return this.loads(fs.readFileSync(file, 'utf8'));
     };
     return Config;
-})();
+}());
 exports.Config = Config;
 //# sourceMappingURL=config.js.map

@@ -1,8 +1,8 @@
-var __extends = this.__extends || function (d, b) {
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 ///<reference path="externals.d.ts"/>
 var util = require('util');
@@ -20,7 +20,7 @@ var Gateway = (function () {
         throw "not implemented";
     };
     return Gateway;
-})();
+}());
 exports.Gateway = Gateway;
 var ArduinoDevice = (function () {
     function ArduinoDevice(id, initString) {
@@ -28,7 +28,7 @@ var ArduinoDevice = (function () {
         this.initString = initString;
     }
     return ArduinoDevice;
-})();
+}());
 exports.ArduinoDevice = ArduinoDevice;
 var ArduinoSerialGateway = (function (_super) {
     __extends(ArduinoSerialGateway, _super);
@@ -90,7 +90,8 @@ var ArduinoSerialGateway = (function (_super) {
                 self.restart(cmd, args);
             });
         });
-        child.stdout.pipe(split()).on('data', function (line) {
+        child.stdout.pipe(split())
+            .on('data', function (line) {
             var fields = line.split(',');
             //logger.debug(util.format("serial(%s): %s", self.id, line));
             //fields[1] !== self.deviceId
@@ -145,6 +146,6 @@ var ArduinoSerialGateway = (function (_super) {
         return deferred.promise;
     };
     return ArduinoSerialGateway;
-})(Gateway);
+}(Gateway));
 exports.ArduinoSerialGateway = ArduinoSerialGateway;
 //# sourceMappingURL=gateway.js.map

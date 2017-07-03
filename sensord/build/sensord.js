@@ -1,3 +1,4 @@
+"use strict";
 var _this = this;
 var Q = require('q');
 var fs = require('fs');
@@ -36,35 +37,46 @@ winston.addColors({
 //      define command line parser
 //--------------------------------------------------------------------------
 var packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-var args = yargs.usage("Usage: $0 -f config [options]").help('h').alias('h', 'help').option('v', {
+var args = yargs
+    .usage("Usage: $0 -f config [options]")
+    .help('h')
+    .alias('h', 'help')
+    .option('v', {
     alias: 'version',
     demand: false,
     describe: 'display package version'
-}).option('d', {
+})
+    .option('d', {
     alias: 'debug',
     demand: false,
     describe: 'debug logging'
-}).option('b', {
+})
+    .option('b', {
     alias: 'background',
     demand: false,
     describe: 'daemon mode'
-}).option('l', {
+})
+    .option('l', {
     alias: 'log',
     demand: false,
     describe: 'add (winston) log transport. available transports: console:options | file:options | syslog:options | DailyRotateFile:options',
     type: 'string'
-}).option('c', {
+})
+    .option('c', {
     alias: 'config',
     demand: false,
     'default': '/etc/sensord.conf',
     describe: 'config file',
     type: 'string'
-}).option('p', {
+})
+    .option('p', {
     alias: 'pidfile',
     demand: false,
     describe: 'create pid file',
     type: 'string'
-}).strict().parse(process.argv);
+})
+    .strict()
+    .parse(process.argv);
 var cliError = function (msg) {
     console.error("CLI error: " + msg);
     process.exit(10);
@@ -154,7 +166,8 @@ cfg.mqttClient.once('connect', function () {
     _.forEach(cfg.gateways, function (gw) {
         startGateways.push(gw.start());
     }, _this);
-    Q.allSettled(startGateways).then(function () {
+    Q.allSettled(startGateways)
+        .then(function () {
         logger.info("service started");
     });
 });
