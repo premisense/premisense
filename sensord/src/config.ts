@@ -64,6 +64,11 @@ export class Config {
 
       if (gatewayType === "ArduinoSerialGateway") {
 
+        var disabled = v['disabled'];
+        if (!U.isNullOrUndefined(disabled)) {
+          return;
+        }
+
         var devices:gatewayModule.ArduinoDevice[] = [];
         _.forEach(v['devices'], (deviceConfig,deviceId) => {
           var deviceInitString:string = deviceConfig['initString'];
